@@ -156,6 +156,7 @@ func mailToMail(m *mail.Reader) (*Mail, error) {
 			break
 		} else if err != nil {
 			logrus.Errorf("parse mail part: %v", err)
+			break
 		}
 
 		switch part.Header.(type) {
