@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/sirupsen/logrus"
-	"log"
 )
 
 type Meilisearch struct {
@@ -100,26 +99,5 @@ func (m *Meilisearch) IndexMail(mail []*Mail) error {
 	}
 
 	logrus.Infof("Created / updated %d mails", len(mail))
-	return nil
-}
-
-func (m *Meilisearch) Query(text string) error {
-
-	res, err := m.client.Search(m.Index).Search(meilisearch.SearchRequest{
-		Query:            text,
-		Limit:            15,
-		CropLength:       100,
-		AttributesToCrop: []string{"message"},
-	})
-
-	if err != nil {
-		return err
-	}
-
-	for _, v := range res.Hits {
-		log.Println(v)
-
-	}
-
 	return nil
 }

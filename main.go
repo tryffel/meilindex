@@ -32,13 +32,14 @@ var meilisearchApiKey = "masterKey"
 func main() {
 	index := flag.Bool("index", false, "Index mail")
 	query := flag.String("query", "", "Query to search")
+	filter := flag.String("filter", "", "Filter search")
 
 	flag.Parse()
 
 	if *index {
 		indexMail()
 	} else if *query != "" {
-		searchMail(*query)
+		searchMail(*query, *filter)
 	}
 }
 
@@ -85,19 +86,4 @@ func indexMail() {
 		logrus.Error(err)
 	}
 
-}
-
-func searchMail(query string) {
-	ms := Meilisearch{
-		Url:    meilisearchHost,
-		Index:  meilisearchIndex,
-		ApiKey: meilisearchApiKey,
-	}
-
-	err := ms.Connect()
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	err = ms.Query(query)
 }

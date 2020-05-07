@@ -41,6 +41,7 @@ func (m *Mail) String() string {
 	return fmt.Sprintf(
 		`
 id: %d,
+folder: %s
 date: %s
 from: %s,
 to: %s, 
@@ -48,7 +49,7 @@ cc: %s,
 subject: %s,
 
 %s
-`, m.Id, m.Date, m.From, m.To, m.Cc, m.Subject, m.Body)
+`, m.Id, m.Folder, m.Date, m.From, m.To, m.Cc, m.Subject, m.Body)
 }
 
 func (m *Mail) BodyPlainText() string {
