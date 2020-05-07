@@ -18,35 +18,8 @@
  *
  */
 
-package main
+package config
 
-import (
-	"fmt"
-)
-
-type Mail struct {
-	Id          string `json:"id"`
-	From        string `json:"from"`
-	To          string `json:"to"`
-	Cc          string `json:"cc"`
-	Subject     string `json:"subject"`
-	Body        string `json:"body"`
-	Date        string `json:"date"`
-	Folder      string `json:"folder"`
-	Attachments [][]byte
-}
-
-func (m *Mail) String() string {
-	return fmt.Sprintf(
-		`
-id: %s,
-folder: %s
-date: %s
-from: %s,
-to: %s, 
-cc: %s,
-subject: %s,
-
-%s
-`, m.Id, m.Folder, m.Date, m.From, m.To, m.Cc, m.Subject, m.Body)
-}
+var MeilisearchHost = "http://localhost:7700"
+var MeilisearchIndex = "mail"
+var MeilisearchApiKey = "masterKey"

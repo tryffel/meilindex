@@ -18,7 +18,7 @@
  *
  */
 
-package main
+package indexer
 
 import (
 	"crypto/md5"

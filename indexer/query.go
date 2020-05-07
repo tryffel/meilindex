@@ -18,24 +18,23 @@
  *
  */
 
-package main
+package indexer
 
 import (
 	"github.com/meilisearch/meilisearch-go"
-	"github.com/mgutz/ansi"
 	"github.com/sirupsen/logrus"
 	"regexp"
-	"strings"
+	"tryffel.net/go/meilindex/config"
 )
 
 var queryPattern = `([+-])?([a-zA-Z]+):(\w+|'[\w ]+')`
 var queryRegex = regexp.MustCompile(queryPattern)
 
-func searchMail(query string, filter string) {
+func SearchMail(query string, filter string) {
 	ms := Meilisearch{
-		Url:    meilisearchHost,
-		Index:  meilisearchIndex,
-		ApiKey: meilisearchApiKey,
+		Url:    config.MeilisearchHost,
+		Index:  config.MeilisearchIndex,
+		ApiKey: config.MeilisearchApiKey,
 	}
 
 	err := ms.Connect()
@@ -43,62 +42,58 @@ func searchMail(query string, filter string) {
 		logrus.Error(err)
 	}
 
-	err = ms.Query(query, filter)
+	_, err = ms.Query(query, filter)
 	if err != nil {
 		logrus.Error(err)
 	}
 }
 
-func (m *Meilisearch) Query(query, filter string) error {
+func (m *Meilisearch) Query(query, filter string) ([]*Mail, error) {
 
-	yellow := ansi.ColorCode("yellow+i:black")
-	reset := ansi.ColorCode("reset")
+	//yellow := ansi.ColorCode("yellow+i:black")
+	//reset := ansi.ColorCode("reset")
 
 	res, err := m.client.Search(m.Index).Search(meilisearch.SearchRequest{
 
 		Query:                 query,
-		Limit:                 10,
+		Limit:                 40,
 		AttributesToCrop:      []string{"message:200"},
 		AttributesToHighlight: []string{"message"},
 		Filters:               filter,
 	})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	for _, v := range res.Hits {
+	result := make([]*Mail, len(res.Hits))
+
+	for i, v := range res.Hits {
 		isMap, ok := v.(map[string]interface{})
 		formatted := isMap["_formatted"]
-		mail := Mail{}
+		mail := &Mail{}
 		if ok {
 			if isFormatted, ok := formatted.(map[string]interface{}); ok {
-				if isString, ok := isFormatted["message"].(string); ok {
-					if strings.Contains(isString, "<em>") {
-						isString = strings.Replace(isString, "<em>", yellow, -1)
-						isString = strings.Replace(isString, "</em>", reset, -1)
-
-						isMap["message"] = isString
-						mail.Body = isString
-					}
-				}
-			} else {
-				mail.Body = get("message", isMap)
+				mail.Body = get("message", isFormatted)
 			}
-			mail.Id = get("uid", isMap)
-			mail.From = get("from", isMap)
-			mail.To = get("to", isMap)
-			mail.Cc = get("cc", isMap)
-			mail.Subject = get("subject", isMap)
-			mail.Folder = get("folder", isMap)
-			mail.Date = get("date", isMap)
+		} else {
+			mail.Body = get("message", isMap)
 		}
-		println(mail.String())
-		println("\n\n")
-		println("===============================================")
-	}
+		mail.Id = get("uid", isMap)
+		mail.From = get("from", isMap)
+		mail.To = get("to", isMap)
+		mail.Cc = get("cc", isMap)
+		mail.Subject = get("subject", isMap)
+		mail.Folder = get("folder", isMap)
+		mail.Date = get("date", isMap)
 
-	return nil
+		result[i] = mail
+
+	}
+	//println(mail.String())
+	//println("\n\n")
+	//p//rintln("===============================================")
+	return result, nil
 }
 
 func get(key string, container map[string]interface{}) string {

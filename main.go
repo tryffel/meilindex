@@ -23,11 +23,10 @@ package main
 import (
 	"flag"
 	"github.com/sirupsen/logrus"
+	"tryffel.net/go/meilindex/config"
+	"tryffel.net/go/meilindex/indexer"
+	"tryffel.net/go/meilindex/ui/widgets"
 )
-
-var meilisearchHost = "http://localhost:7700"
-var meilisearchIndex = "mail"
-var meilisearchApiKey = "masterKey"
 
 func main() {
 	index := flag.Bool("index", false, "Index mail")
@@ -39,13 +38,16 @@ func main() {
 	if *index {
 		indexMail()
 	} else if *query != "" {
-		searchMail(*query, *filter)
+		indexer.SearchMail(*query, *filter)
+	} else {
+		w := widgets.NewWindow()
+		w.Run()
 	}
 }
 
 func indexMail() {
 
-	client := &Imap{
+	client := &indexer.Imap{
 		Url:                 "imap.mymail.com:993",
 		Tls:                 true,
 		TlsSkipVerification: false,
@@ -70,10 +72,10 @@ func indexMail() {
 	}
 
 	mails, err := client.FetchMail()
-	ms := Meilisearch{
-		Url:    meilisearchHost,
-		Index:  meilisearchIndex,
-		ApiKey: meilisearchApiKey,
+	ms := indexer.Meilisearch{
+		Url:    config.MeilisearchHost,
+		Index:  config.MeilisearchIndex,
+		ApiKey: config.MeilisearchApiKey,
 	}
 
 	err = ms.Connect()
