@@ -44,6 +44,9 @@ func searchMail(query string, filter string) {
 	}
 
 	err = ms.Query(query, filter)
+	if err != nil {
+		logrus.Error(err)
+	}
 }
 
 func (m *Meilisearch) Query(query, filter string) error {
@@ -82,6 +85,7 @@ func (m *Meilisearch) Query(query, filter string) error {
 			} else {
 				mail.Body = get("message", isMap)
 			}
+			mail.Id = get("uid", isMap)
 			mail.From = get("from", isMap)
 			mail.To = get("to", isMap)
 			mail.Cc = get("cc", isMap)

@@ -25,9 +25,12 @@ import (
 	"fmt"
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
+	_ "github.com/emersion/go-message/charset"
+	"github.com/emersion/go-message/mail"
+	"github.com/jaytaylor/html2text"
 	"github.com/sirupsen/logrus"
+	"io"
 	"io/ioutil"
-	"net/mail"
 )
 
 type Imap struct {
@@ -92,6 +95,8 @@ func (i *Imap) FetchMail() ([]*Mail, error) {
 	start := 1
 	stop := i.mailbox.Messages
 
+	//stop = 10
+
 	sequence.AddRange(stop, uint32(start))
 	section := &imap.BodySectionName{}
 
@@ -109,28 +114,64 @@ func (i *Imap) FetchMail() ([]*Mail, error) {
 
 	for i := 0; i < len(mails); i++ {
 		msg := <-messages
-		parsed, err := mail.ReadMessage(msg.GetBody(section))
+		parsed, err := mail.CreateReader(msg.GetBody(section))
 		if err != nil {
 			logrus.Errorf("parse mail: %v", err)
-			continue
 		}
 
-		h := parsed.Header
-		m := &Mail{
-			Id:      int64(msg.Uid),
-			From:    h.Get("From"),
-			To:      h.Get("To"),
-			Cc:      h.Get("Cc"),
-			Date:    h.Get("Date"),
-			Subject: h.Get("Subject"),
-			Folder:  folder,
-		}
-
-		body, err := ioutil.ReadAll(parsed.Body)
-		m.Body = string(body)
+		m, err := mailToMail(parsed)
+		m.Folder = folder
 
 		mails[i] = m
 	}
 
 	return mails, nil
+}
+
+func mailToMail(m *mail.Reader) (*Mail, error) {
+	var err error
+	h := m.Header
+	out := &Mail{
+		From:    h.Get("From"),
+		To:      h.Get("To"),
+		Cc:      h.Get("Cc"),
+		Date:    h.Get("Date"),
+		Subject: h.Get("Subject"),
+	}
+
+	out.Id, err = h.MessageID()
+	d, err := h.Date()
+	if err == nil {
+		out.Date = d.String()
+	}
+
+	s, err := h.Subject()
+	if err == nil {
+		out.Subject = s
+	}
+
+	for {
+		part, err := m.NextPart()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			logrus.Errorf("parse mail part: %v", err)
+		}
+
+		switch part.Header.(type) {
+		case *mail.InlineHeader:
+			out.Body, err = html2text.FromReader(part.Body, html2text.Options{
+				PrettyTables: false,
+			})
+		case *mail.AttachmentHeader:
+			b, err := ioutil.ReadAll(part.Body)
+			if err != nil {
+				logrus.Errorf("read message attachment: %v", err)
+			} else {
+				out.Attachments = append(out.Attachments, b)
+			}
+
+		}
+	}
+	return out, err
 }

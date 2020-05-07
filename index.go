@@ -21,6 +21,7 @@
 package main
 
 import (
+	"crypto/md5"
 	"fmt"
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/sirupsen/logrus"
@@ -61,7 +62,7 @@ func (m *Meilisearch) Connect() error {
 		logrus.Warning("Creating new index")
 		_, err = m.client.Indexes().Create(meilisearch.CreateIndexRequest{
 			UID:        m.Index,
-			PrimaryKey: "id",
+			PrimaryKey: "uid",
 		})
 
 	}
@@ -87,17 +88,22 @@ func (m *Meilisearch) IndexMail(mail []*Mail) error {
 		doc["to"] = v.To
 		doc["cc"] = v.Cc
 		doc["subject"] = v.Subject
-		doc["message"] = v.BodyPlainText()
+		doc["message"] = v.Body
 		doc["folder"] = v.Folder
 		documents[i] = doc
+
+		hash := md5.Sum([]byte(v.Id))
+		doc["uid"] = fmt.Sprintf("%x", hash)
 	}
 
-	_, err := m.client.Documents(m.Index).AddOrUpdate(documents)
+	res, err := m.client.Documents(m.Index).AddOrReplace(documents)
+
+	logrus.Info("Meilisearch update id: ", res.UpdateID)
 
 	if err != nil {
 		return fmt.Errorf("push documents: %v", err)
+	} else {
+		logrus.Infof("Created / updated %d mails", len(mail))
 	}
-
-	logrus.Infof("Created / updated %d mails", len(mail))
 	return nil
 }

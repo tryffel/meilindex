@@ -22,25 +22,24 @@ package main
 
 import (
 	"fmt"
-	"github.com/jaytaylor/html2text"
-	"github.com/sirupsen/logrus"
 )
 
 type Mail struct {
-	Id      int64  `json:"id"`
-	From    string `json:"from"`
-	To      string `json:"to"`
-	Cc      string `json:"cc"`
-	Subject string `json:"subject"`
-	Body    string `json:"body"`
-	Date    string `json:"date"`
-	Folder  string `json:"folder"`
+	Id          string `json:"id"`
+	From        string `json:"from"`
+	To          string `json:"to"`
+	Cc          string `json:"cc"`
+	Subject     string `json:"subject"`
+	Body        string `json:"body"`
+	Date        string `json:"date"`
+	Folder      string `json:"folder"`
+	Attachments [][]byte
 }
 
 func (m *Mail) String() string {
 	return fmt.Sprintf(
 		`
-id: %d,
+id: %s,
 folder: %s
 date: %s
 from: %s,
@@ -50,17 +49,4 @@ subject: %s,
 
 %s
 `, m.Id, m.Folder, m.Date, m.From, m.To, m.Cc, m.Subject, m.Body)
-}
-
-func (m *Mail) BodyPlainText() string {
-	text, err := html2text.FromString(m.Body, html2text.Options{
-		PrettyTables: false,
-	})
-
-	if err != nil {
-		logrus.Errorf("get plain text from html body: %v", err)
-		return m.Body
-	}
-
-	return text
 }
