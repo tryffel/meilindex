@@ -40,8 +40,8 @@ Examples:
 * meilindex index imap --folder Archive/Inbox
 `,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
-			return fmt.Errorf("expected 1 argument")
+		if len(args) < 1 {
+			return fmt.Errorf("expected at least 1 argument")
 		}
 		if args[0] != "imap" && args[0] != "file" {
 			return fmt.Errorf("expect location either 'imap' or 'file'")
@@ -54,6 +54,7 @@ func init() {
 	rootCmd.AddCommand(indexCmd)
 
 	indexCmd.Flags().String("folder", "INBOX", "Folder to index")
+	indexCmd.Flags().String("file", "", "File to index")
 	indexCmd.Run = indexMail
 
 }
@@ -61,11 +62,13 @@ func init() {
 func indexMail(cmd *cobra.Command, args []string) {
 	var mails []*indexer.Mail
 	var err error
-	//mode := "imap"
 	if args[0] == "file" {
-		//mode = "file"
-		fmt.Println("File indexing not implemented yet")
-		return
+		file, err := indexCmd.Flags().GetString("file")
+		mails, err = indexer.ReadFile(file)
+		if err != nil {
+			fmt.Println(err)
+			//return
+		}
 	} else {
 		mails, err = retrieveImap()
 		if err != nil {

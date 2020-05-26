@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/emersion/go-imap v1.0.4
+	github.com/emersion/go-mbox v1.0.0
 	github.com/emersion/go-message v0.11.2
 	github.com/gdamore/tcell v1.3.0
 	github.com/jaytaylor/html2text v0.0.0-20200412013138-3577fbdbcff7
