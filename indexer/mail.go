@@ -22,6 +22,7 @@ package indexer
 
 import (
 	"fmt"
+	"strings"
 )
 
 type Mail struct {
@@ -37,6 +38,22 @@ type Mail struct {
 }
 
 func (m *Mail) String() string {
+	rowLen := 70
+	body := m.Body
+	if len(body) > 40 {
+		var parts []string
+		i := 0
+		for true {
+			if len(body) < rowLen*i+rowLen {
+				parts = append(parts, body[rowLen*i:len(body)-1])
+				break
+			} else {
+				parts = append(parts, body[rowLen*i:rowLen*i+rowLen])
+			}
+			i += 1
+		}
+		body = strings.Join(parts, "\n")
+	}
 	return fmt.Sprintf(
 		`
 id: %s,
@@ -48,5 +65,6 @@ cc: %s,
 subject: %s,
 
 %s
-`, m.Id, m.Folder, m.Date, m.From, m.To, m.Cc, m.Subject, m.Body)
+
+`, m.Id, m.Folder, m.Date, m.From, m.To, m.Cc, m.Subject, body)
 }

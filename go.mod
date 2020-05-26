@@ -10,9 +10,11 @@ require (
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/meilisearch/meilisearch-go v0.9.1
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/olekukonko/tablewriter v0.0.4 // indirect
 	github.com/sirupsen/logrus v1.6.0
+	github.com/spf13/cobra v1.0.0
+	github.com/spf13/viper v1.4.0
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
 	gitlab.com/tslocum/cview v1.4.5
-	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b
 )

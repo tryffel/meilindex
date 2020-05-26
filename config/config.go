@@ -20,6 +20,37 @@
 
 package config
 
-var MeilisearchHost = "http://localhost:7700"
-var MeilisearchIndex = "mail"
-var MeilisearchApiKey = "masterKey"
+const Version = "v0.0.1"
+
+var Conf *Config
+
+// Config is application configuration struct
+type Config struct {
+	File        File
+	Imap        Imap
+	Meilisearch Meilisearch
+}
+
+// File is email locating on filesystem
+type File struct {
+	Directory string
+	Recursive bool
+	Pattern   string
+}
+
+// Imap is imap-based email source
+type Imap struct {
+	Url              string
+	Tls              bool
+	SkipVerification bool
+	Username         string
+	Password         string
+	Folder           string
+}
+
+// Meilisearch contains meilisearch-instance configuration
+type Meilisearch struct {
+	Url    string
+	Index  string
+	ApiKey string
+}

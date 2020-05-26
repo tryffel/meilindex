@@ -75,6 +75,25 @@ func (i *Imap) Disconnect() error {
 	return nil
 }
 
+func (i *Imap) Mailboxes() []string {
+	mailboxes := make(chan *imap.MailboxInfo, 10)
+	done := make(chan error, 1)
+	go func() {
+		done <- i.client.List("", "*", mailboxes)
+	}()
+
+	results := make([]string, 0)
+
+	num := 0
+	for m := range mailboxes {
+		results = append(results, m.Name)
+		num += 1
+	}
+
+	return results
+
+}
+
 func (i *Imap) SelectMailbox(name string) error {
 	mbox, err := i.client.Select(name, true)
 	if err != nil {

@@ -20,72 +20,8 @@
 
 package main
 
-import (
-	"flag"
-	"github.com/sirupsen/logrus"
-	"tryffel.net/go/meilindex/config"
-	"tryffel.net/go/meilindex/indexer"
-	"tryffel.net/go/meilindex/ui/widgets"
-)
+import "tryffel.net/go/meilindex/cmd"
 
 func main() {
-	index := flag.Bool("index", false, "Index mail")
-	query := flag.String("query", "", "Query to search")
-	filter := flag.String("filter", "", "Filter search")
-
-	flag.Parse()
-
-	if *index {
-		indexMail()
-	} else if *query != "" {
-		indexer.SearchMail(*query, *filter)
-	} else {
-		w := widgets.NewWindow()
-		w.Run()
-	}
-}
-
-func indexMail() {
-
-	client := &indexer.Imap{
-		Url:                 "imap.mymail.com:993",
-		Tls:                 true,
-		TlsSkipVerification: false,
-		Username:            "me@mymail.com",
-		Password:            "memailing",
-	}
-
-	err := client.Connect()
-	if err != nil {
-		logrus.Error(err)
-		return
-	} else {
-		logrus.Info("Logged in")
-	}
-
-	defer client.Disconnect()
-
-	err = client.SelectMailbox("INBOX")
-	if err != nil {
-		logrus.Errorf("select mailbox: %v", err)
-		return
-	}
-
-	mails, err := client.FetchMail()
-	ms := indexer.Meilisearch{
-		Url:    config.MeilisearchHost,
-		Index:  config.MeilisearchIndex,
-		ApiKey: config.MeilisearchApiKey,
-	}
-
-	err = ms.Connect()
-	if err != nil {
-		logrus.Error(err)
-	}
-
-	err = ms.IndexMail(mails)
-	if err != nil {
-		logrus.Error(err)
-	}
-
+	cmd.Execute()
 }

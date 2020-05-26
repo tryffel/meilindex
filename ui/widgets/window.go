@@ -46,9 +46,9 @@ func NewWindow() *Window {
 		app:     cview.NewApplication(),
 		results: cview.NewTable(),
 		client: &indexer.Meilisearch{
-			Url:    config.MeilisearchHost,
-			Index:  config.MeilisearchIndex,
-			ApiKey: config.MeilisearchApiKey,
+			Url:    config.Conf.Meilisearch.Url,
+			Index:  config.Conf.Meilisearch.Index,
+			ApiKey: config.Conf.Meilisearch.ApiKey,
 		},
 		preview: cview.NewTextView(),
 	}
@@ -89,7 +89,7 @@ func (w *Window) Run() {
 }
 
 func (w *Window) search(text string) {
-	mails, err := w.client.Query(text, "")
+	mails, took, err := w.client.Query(text, "")
 	if err != nil {
 		return
 	}
@@ -114,6 +114,8 @@ func (w *Window) search(text string) {
 		w.results.SetCellSimple(i+1, 3, v.Subject)
 		w.results.SetCellSimple(i+1, 4, v.Body)
 	}
+
+	w.results.SetTitle(fmt.Sprintf("Results (%d ms)", took))
 }
 
 func (w *Window) showMessage(index int, col int) {

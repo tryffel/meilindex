@@ -55,7 +55,7 @@ func (m *Meilisearch) Connect() error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("get indexes")
+		return fmt.Errorf("get indexes: %v", err)
 	}
 
 	if !indexExists {

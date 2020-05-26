@@ -21,9 +21,12 @@
 package indexer
 
 import (
+	"fmt"
 	"github.com/meilisearch/meilisearch-go"
+	"github.com/mgutz/ansi"
 	"github.com/sirupsen/logrus"
 	"regexp"
+	"strings"
 	"tryffel.net/go/meilindex/config"
 )
 
@@ -32,9 +35,9 @@ var queryRegex = regexp.MustCompile(queryPattern)
 
 func SearchMail(query string, filter string) {
 	ms := Meilisearch{
-		Url:    config.MeilisearchHost,
-		Index:  config.MeilisearchIndex,
-		ApiKey: config.MeilisearchApiKey,
+		Url:    config.Conf.Meilisearch.Url,
+		Index:  config.Conf.Meilisearch.Index,
+		ApiKey: config.Conf.Meilisearch.ApiKey,
 	}
 
 	err := ms.Connect()
@@ -42,19 +45,32 @@ func SearchMail(query string, filter string) {
 		logrus.Error(err)
 	}
 
-	_, err = ms.Query(query, filter)
+	mails, _, err := ms.Query(query, filter)
 	if err != nil {
 		logrus.Error(err)
+	} else {
+		yellow := ansi.ColorCode("yellow+i:black")
+		reset := ansi.ColorCode("reset")
+		for i := 0; i < len(mails); i++ {
+			mail := mails[i]
+			if strings.Contains(mail.Body, "<em>") {
+				mail.Body = strings.Replace(mail.Body, "<em>", yellow, -1)
+				mail.Body = strings.Replace(mail.Body, "</em>", reset, -1)
+			}
+
+			mail.Subject = ansi.Blue + mail.Subject + ansi.Reset
+			fmt.Println("-----------------")
+			fmt.Printf("%d %s", i, mail.String())
+		}
 	}
 }
 
-func (m *Meilisearch) Query(query, filter string) ([]*Mail, error) {
+func (m *Meilisearch) Query(query, filter string) ([]*Mail, int, error) {
 
 	//yellow := ansi.ColorCode("yellow+i:black")
 	//reset := ansi.ColorCode("reset")
 
 	res, err := m.client.Search(m.Index).Search(meilisearch.SearchRequest{
-
 		Query:                 query,
 		Limit:                 40,
 		AttributesToCrop:      []string{"message:200"},
@@ -63,7 +79,7 @@ func (m *Meilisearch) Query(query, filter string) ([]*Mail, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
 	result := make([]*Mail, len(res.Hits))
@@ -93,7 +109,7 @@ func (m *Meilisearch) Query(query, filter string) ([]*Mail, error) {
 	//println(mail.String())
 	//println("\n\n")
 	//p//rintln("===============================================")
-	return result, nil
+	return result, int(res.ProcessingTimeMs), nil
 }
 
 func get(key string, container map[string]interface{}) string {
