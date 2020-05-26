@@ -81,6 +81,7 @@ func (m *Meilisearch) IndexMail(mail []*Mail) error {
 	documents := make([]map[string]interface{}, len(mail))
 
 	for i, v := range mail {
+		v.Sanitize()
 		doc := map[string]interface{}{}
 		doc["id"] = v.Id
 		doc["date"] = v.Date

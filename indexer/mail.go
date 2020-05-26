@@ -22,6 +22,8 @@ package indexer
 
 import (
 	"fmt"
+	"gitlab.com/tslocum/cview"
+	"regexp"
 	"strings"
 )
 
@@ -38,22 +40,6 @@ type Mail struct {
 }
 
 func (m *Mail) String() string {
-	rowLen := 70
-	body := m.Body
-	if len(body) > 40 {
-		var parts []string
-		i := 0
-		for true {
-			if len(body) < rowLen*i+rowLen {
-				parts = append(parts, body[rowLen*i:len(body)-1])
-				break
-			} else {
-				parts = append(parts, body[rowLen*i:rowLen*i+rowLen])
-			}
-			i += 1
-		}
-		body = strings.Join(parts, "\n")
-	}
 	return fmt.Sprintf(
 		`
 id: %s,
@@ -66,5 +52,50 @@ subject: %s,
 
 %s
 
-`, m.Id, m.Folder, m.Date, m.From, m.To, m.Cc, m.Subject, body)
+`, m.Id, m.Folder, m.Date, m.From, m.To, m.Cc, m.Subject, m.Body)
+}
+
+// Sanitize makes various mail attributes nicer to read.
+func (m *Mail) Sanitize() {
+	body := cview.WordWrap(m.Body, 70)
+	m.Body = strings.Join(body, "\n")
+
+	m.From = strings.Join(stripdAddressNames(m.From), ", ")
+	m.To = strings.Join(stripdAddressNames(m.To), ", ")
+	m.Cc = strings.Join(stripdAddressNames(m.Cc), ", ")
+}
+
+var addressNames = regexp.MustCompile(`\"([^'\"]+)\"\s<([\w.]+@[a-zA-Z.]+)>`)
+var plainAddress = regexp.MustCompile(`([\w.]+@[a-zA-Z.]+)`)
+var escapedNames = regexp.MustCompile(`\"'([^\"]+)'\"\s<([\w.]+@[a-zA-Z.]+)>`)
+
+// strip multiple addresses and possible names to names-only list
+func stripdAddressNames(address string) []string {
+	var out []string
+	// Catch "person" <address>
+	matches := addressNames.FindAllStringSubmatch(address, -1)
+	if len(matches) > 0 {
+		for _, v := range matches {
+			out = append(out, v[1])
+		}
+		return out
+	}
+	// catch "'sender'" <address>
+	matches = escapedNames.FindAllStringSubmatch(address, -1)
+	if len(matches) > 0 {
+		for _, v := range matches {
+			out = append(out, v[1])
+		}
+		return out
+	}
+
+	// catch address
+	matches = plainAddress.FindAllStringSubmatch(address, -1)
+	if len(matches) > 0 {
+		for _, v := range matches {
+			out = append(out, v[1])
+		}
+		return out
+	}
+	return []string{address}
 }
