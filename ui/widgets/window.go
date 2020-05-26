@@ -98,9 +98,9 @@ func (w *Window) search(text string) {
 	w.results.Clear()
 	w.results.SetCellSimple(0, 0, "#")
 	w.results.SetCellSimple(0, 1, "From")
-	w.results.SetCellSimple(0, 3, "Date")
-	w.results.SetCellSimple(0, 4, "Subject")
-	w.results.SetCellSimple(0, 5, "Message")
+	w.results.SetCellSimple(0, 2, "Date")
+	w.results.SetCellSimple(0, 3, "Subject")
+	w.results.SetCellSimple(0, 4, "Message")
 	for i, v := range mails {
 		body := v.Body
 		if strings.Contains(body, "<em>") {
