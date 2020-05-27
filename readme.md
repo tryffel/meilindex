@@ -1,6 +1,8 @@
 # Meilindex
 
 [![License](https://img.shields.io/github/license/tryffel/mailindex.svg)](LICENSE)
+[![Godoc Reference](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/tryffel.net/go/meilindex?tab=overview)
+
 
 Meilindex provides email indexing from Imap/Mbox file into Meilisearch search engine. 
 Meilindex also supports some Meilisearch customizations,   
@@ -17,17 +19,21 @@ go get tryffel.net/go/meilindex
 ```
 
 # Run
-1. Make sure meilisearch is running and accessible
-2. Create & fill config file
+1: Make sure meilisearch is running and accessible
+try with e.g. ```curl http://localhost:7700```
+
+2: Create & fill config file
+
 ```
 meilindex
 ```
 This should create new config file, which is by default at ~/.meilindex.yaml
 You can always override config file with '--config'.
-Edit that, insert at least imap and meilisearch settings.
+Edit config file to suit your needs, insert at least imap and meilisearch settings.
 
-3. Customize Meilisearch index before parsing emails (optional, see below)
-4. Index mail from imap
+3: (Optional) Customize Meilisearch index before parsing emails, see below
+
+4: Index mail from imap
 ```
 # index INBOX
 meilindex index imap 
@@ -36,14 +42,14 @@ meilindex index imap
 meilindex index imap --folder Archive
 ```
 
-5. Query with cli
+5: Query with cli
 ```
 meilindex query my message
 meilindex query --folder inbox --subject "item received" my message
 
 ```
 
-6. Terminal ui for viewing & queying mail
+6: Terminal ui for viewing & queying mail
 ```
 meilindex
 ```
@@ -55,7 +61,7 @@ Movement inside gui:
 * Close application with Ctrl-C
 
 
-# Customize Meilisearch index:
+# Customize Meilisearch index
 Meilisearch features various optimizations and customizations for tailoring search results, 
 see [docs](https://docs.meilisearch.com/references/settings.html) for more info. Meilindex supports 
 modifying some of them, which hopefully makes the search experience better.
@@ -82,6 +88,5 @@ messages first.
 ```
 # View current rules
 meilindex settings ranking get
-
 ```
 
