@@ -25,7 +25,19 @@ import (
 	"fmt"
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/sirupsen/logrus"
+	"tryffel.net/go/meilindex/config"
 )
+
+// NewMeilisearch creates new connection.
+func NewMeiliSearch() (*Meilisearch, error) {
+	m := &Meilisearch{
+		Url:    config.Conf.Meilisearch.Url,
+		Index:  config.Conf.Meilisearch.Index,
+		ApiKey: config.Conf.Meilisearch.ApiKey,
+	}
+	err := m.Connect()
+	return m, err
+}
 
 // Meilisearch is a connector to Meilisearch.
 type Meilisearch struct {
@@ -111,4 +123,29 @@ func (m *Meilisearch) IndexMail(mail []*Mail) error {
 		logrus.Infof("Created / updated %d mails", len(mail))
 	}
 	return nil
+}
+
+// RankingRules returns a list of ranking rules. First rule is the most important, last is least important.
+func (m *Meilisearch) RankingRules() (*[]string, error) {
+
+	return m.client.Settings(m.Index).GetRankingRules()
+}
+
+func (m *Meilisearch) SetRankingRules(rules []string) error {
+	_, err := m.client.Settings(m.Index).UpdateRankingRules(rules)
+	return err
+}
+
+// StopWords returns all stop words currently being used.
+func (m *Meilisearch) StopWords() (*[]string, error) {
+	words, err := m.client.Settings(m.Index).GetStopWords()
+	if err != nil {
+		return nil, err
+	}
+	return words, nil
+}
+
+func (m *Meilisearch) SetStopWords(words []string) error {
+	_, err := m.client.Settings(m.Index).UpdateStopWords(words)
+	return err
 }
