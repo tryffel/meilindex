@@ -83,10 +83,13 @@ you need to combine the stop_word lists into a single file, for now.
 
 ## Ranking rules
 Ranking is based on a set of rules. Meilisearch provides default set, which you can change to see more relevant
-messages first. 
+messages first. Creating new rules is not supported yet. See asset/ranking-default.json for format.
 
 ```
 # View current rules
 meilindex settings ranking get
+
+# Reorder rules
+meilindex settings ranking set assets/ranking-default.json
 ```
 

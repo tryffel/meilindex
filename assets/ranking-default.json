@@ -1,0 +1,10 @@
+{
+  "rankings": [
+    "words",
+    "typo",
+    "proximity",
+    "attribute",
+    "wordsPosition",
+    "exactness"
+  ]
+}

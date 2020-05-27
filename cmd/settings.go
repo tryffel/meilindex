@@ -132,6 +132,29 @@ func rankings(cmd *cobra.Command, args []string) {
 		fmt.Println("Rules:")
 		fmt.Println(*rules)
 	} else {
+		file := args[1]
+		fd, err := os.Open(file)
+		if err != nil {
+			fmt.Printf("Error opening file: %v\n", err)
+			return
+		}
+		defer fd.Close()
 
+		type Dto struct {
+			RankRules []string `json:"rankings"`
+		}
+
+		dto := Dto{}
+
+		err = json.NewDecoder(fd).Decode(&dto)
+		if err != nil {
+			fmt.Printf("Error decoding json: %v\n", err)
+			return
+		}
+
+		err = m.SetRankingRules(dto.RankRules)
+		if err != nil {
+			fmt.Printf("Error applying ranking rules: %v\n", err)
+		}
 	}
 }
