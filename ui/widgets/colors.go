@@ -25,25 +25,15 @@ import (
 	"gitlab.com/tslocum/cview"
 )
 
-type QueryInput struct {
-	*cview.Form
-	query *cview.InputField
-}
+const (
+	colorBackground         = tcell.Color234
+	colorText               = tcell.Color252
+	colorBackgroundSelected = tcell.Color23
+	colorTextSelected       = tcell.Color252
+	colorDisabled           = tcell.Color241
+)
 
-func NewQueryInput(query func(string)) *QueryInput {
-	q := &QueryInput{
-		Form:  cview.NewForm(),
-		query: cview.NewInputField(),
-	}
-
-	q.SetBorder(false)
-	q.query.SetLabel("Query")
-	q.query.SetPlaceholder("marketing OR sales")
-
-	q.SetFieldTextColor(tcell.Color252)
-	q.SetFieldBackgroundColor(tcell.Color235)
-
-	q.AddFormItem(q.query)
-	q.query.SetChangedFunc(query)
-	return q
+func init() {
+	cview.Styles.PrimaryTextColor = colorText
+	cview.Styles.PrimitiveBackgroundColor = colorBackground
 }

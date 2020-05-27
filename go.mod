@@ -18,4 +18,5 @@ require (
 	github.com/spf13/viper v1.4.0
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
 	gitlab.com/tslocum/cview v1.4.5
+	tryffel.net/go/twidgets v0.0.0-20200509125417-ad1a73eaca8f
 )

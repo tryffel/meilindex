@@ -21,7 +21,6 @@
 package widgets
 
 import (
-	"fmt"
 	"github.com/gdamore/tcell"
 	"gitlab.com/tslocum/cview"
 	"strings"
@@ -33,7 +32,7 @@ type Window struct {
 	*cview.Grid
 	query   *QueryInput
 	app     *cview.Application
-	results *cview.Table
+	list    *MessageList
 	preview *cview.TextView
 	client  *indexer.Meilisearch
 
@@ -42,9 +41,8 @@ type Window struct {
 
 func NewWindow() *Window {
 	w := &Window{
-		Grid:    cview.NewGrid(),
-		app:     cview.NewApplication(),
-		results: cview.NewTable(),
+		Grid: cview.NewGrid(),
+		app:  cview.NewApplication(),
 		client: &indexer.Meilisearch{
 			Url:    config.Conf.Meilisearch.Url,
 			Index:  config.Conf.Meilisearch.Index,
@@ -54,29 +52,24 @@ func NewWindow() *Window {
 	}
 
 	w.query = NewQueryInput(w.search)
+	w.list = NewMessageList(w.showMessage)
 
 	err := w.client.Connect()
 	if err != nil {
 	}
-	w.SetRows(5, -1, -1)
-	w.SetColumns(-1, 1)
-
-	w.results.SetBorder(true)
-	w.results.SetTitle("Results")
-	w.results.SetSelectedStyle(tcell.Color252, tcell.Color23, 0)
+	w.SetRows(3, -1)
+	w.SetColumns(-2, -1)
 
 	w.SetBorder(true)
 	w.SetTitle("Meilindex")
 
-	w.AddItem(w.query, 0, 0, 1, 1, 1, 15, true)
-	w.AddItem(w.results, 1, 0, 1, 1, 5, 15, false)
-	w.AddItem(w.preview, 2, 0, 1, 1, 5, 15, false)
+	w.AddItem(w.query, 0, 0, 1, 2, 1, 15, true)
+	w.AddItem(w.list, 1, 0, 1, 1, 5, 15, false)
+	w.AddItem(w.preview, 1, 1, 1, 1, 5, 15, false)
 
 	w.app.SetRoot(w, true).EnableMouse(true)
 	w.app.SetFocus(w)
 
-	w.results.SetSelectedFunc(w.showMessage)
-	w.results.SetSelectable(true, false)
 	w.preview.SetDynamicColors(true)
 	w.preview.SetBorder(true)
 	w.preview.SetTitle("Preview")
@@ -89,18 +82,14 @@ func (w *Window) Run() {
 }
 
 func (w *Window) search(text string) {
-	mails, took, err := w.client.Query(text, "")
+	mails, _, err := w.client.Query(text, "")
 	if err != nil {
 		return
 	}
 
 	w.mails = mails
-	w.results.Clear()
-	w.results.SetCellSimple(0, 0, "#")
-	w.results.SetCellSimple(0, 1, "From")
-	w.results.SetCellSimple(0, 2, "Date")
-	w.results.SetCellSimple(0, 3, "Subject")
-	w.results.SetCellSimple(0, 4, "Message")
+
+	w.list.Clear()
 	for i, v := range mails {
 		body := v.Body
 		if strings.Contains(body, "<em>") {
@@ -108,21 +97,18 @@ func (w *Window) search(text string) {
 			body = strings.Replace(body, "</em>", "[-:-:-]", -1)
 			v.Body = body
 		}
-		w.results.SetCellSimple(i+1, 0, fmt.Sprint(i+1))
-		w.results.SetCellSimple(i+1, 1, v.From)
-		w.results.SetCellSimple(i+1, 2, v.Date)
-		w.results.SetCellSimple(i+1, 3, v.Subject)
-		w.results.SetCellSimple(i+1, 4, v.Body)
-	}
 
-	w.results.SetTitle(fmt.Sprintf("Results (%d ms)", took))
+		w.list.AddMessage(i+1, v)
+	}
 }
 
-func (w *Window) showMessage(index int, col int) {
-	if index == 0 {
+func (w *Window) showMessage(mail *indexer.Mail) {
+	/*if index == 0 {
 		return
 	}
 	mail := w.mails[index-1]
+
+	*/
 	w.preview.SetText(mail.String())
 }
 
@@ -133,10 +119,10 @@ func (w *Window) inputCapture(event *tcell.EventKey) *tcell.EventKey {
 		focused := w.app.GetFocus()
 
 		switch focused {
-		case w.results:
+		case w.list:
 			nextFocus = w.preview
 		case w.query, w.query.query:
-			nextFocus = w.results
+			nextFocus = w.list
 		case w.preview:
 			nextFocus = w.query
 		default:
