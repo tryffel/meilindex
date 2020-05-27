@@ -27,6 +27,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Meilisearch is a connector to Meilisearch.
 type Meilisearch struct {
 	Url    string
 	Index  string
@@ -34,6 +35,7 @@ type Meilisearch struct {
 	client *meilisearch.Client
 }
 
+// Connect creates a connection to meilisearch instance and initializes index if neccessary.
 func (m *Meilisearch) Connect() error {
 	m.client = meilisearch.NewClient(meilisearch.Config{
 		Host:   m.Url,
@@ -74,6 +76,7 @@ func (m *Meilisearch) Connect() error {
 	return nil
 }
 
+// IndexMail indexes new mail or updates existing mails.
 func (m *Meilisearch) IndexMail(mail []*Mail) error {
 
 	logrus.Infof("Index %d mails", len(mail))
@@ -93,6 +96,7 @@ func (m *Meilisearch) IndexMail(mail []*Mail) error {
 		doc["folder"] = v.Folder
 		documents[i] = doc
 
+		// email ids can be too complex for meilisearch. Use md5 as a unique id for mail.
 		hash := md5.Sum([]byte(v.Id))
 		doc["uid"] = fmt.Sprintf("%x", hash)
 	}
