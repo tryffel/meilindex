@@ -168,7 +168,7 @@ func mailToMail(m *mail.Reader) (*Mail, error) {
 	if err == nil {
 		out.Subject = s
 	}
-
+	inlineHeaders := 0
 	for {
 		part, err := m.NextPart()
 		if err == io.EOF {
@@ -180,9 +180,24 @@ func mailToMail(m *mail.Reader) (*Mail, error) {
 
 		switch part.Header.(type) {
 		case *mail.InlineHeader:
-			out.Body, err = html2text.FromReader(part.Body, html2text.Options{
-				PrettyTables: false,
-			})
+			inlineHeaders += 1
+			// accept only 1st inline header
+			if inlineHeaders == 1 {
+				out.Body, err = html2text.FromReader(part.Body, html2text.Options{
+					PrettyTables: false,
+				})
+			} else {
+				b, err := ioutil.ReadAll(part.Body)
+				if err != nil {
+					logrus.Errorf("read message attachment: %v", err)
+				} else {
+					out.Attachments = append(out.Attachments, b)
+				}
+			}
+
+			if err != nil {
+				logrus.Errorf("Read html body into text: %v", err)
+			}
 		case *mail.AttachmentHeader:
 			b, err := ioutil.ReadAll(part.Body)
 			if err != nil {
