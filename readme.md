@@ -3,11 +3,14 @@
 [![License](https://img.shields.io/github/license/tryffel/mailindex.svg)](LICENSE)
 [![Godoc Reference](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/tryffel.net/go/meilindex?tab=overview)
 
+Email indexing and extremely fast full-text-search with Meilisearch. 
 
-Meilindex provides email indexing from Imap/Mbox file into Meilisearch search engine. 
-Meilindex also supports some Meilisearch customizations,   
-but advanced users can always customize Meilisearch index directly, though.
-Meilindex has a terminal ui for viewing results, everything else is done through CLI.
+Features:
+* Index mail from Imap or Mbox-file (tested with Thunderbird), store to Meilisearch
+* Multiple configurations for different mailboxes
+* Configure Meilisearch: stop words, ranking rules order
+* Query Meilisearch instance either with CLI or with terminal gui
+* Open selected mail in Thunderbird
 
 This is a work-in-progress.
 
