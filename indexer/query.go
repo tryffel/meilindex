@@ -75,7 +75,7 @@ func (m *Meilisearch) Query(query, filter string) ([]*Mail, int, error) {
 		Query:                 query,
 		Limit:                 40,
 		AttributesToCrop:      []string{"message:200"},
-		AttributesToHighlight: []string{"message"},
+		AttributesToHighlight: []string{"message", "subject"},
 		Filters:               filter,
 	})
 
@@ -91,17 +91,24 @@ func (m *Meilisearch) Query(query, filter string) ([]*Mail, int, error) {
 		mail := &Mail{}
 		if ok {
 			if isFormatted, ok := formatted.(map[string]interface{}); ok {
-				mail.Body = getString("message", isFormatted)
+				body := getString("message", isFormatted)
+				if body != "" {
+					mail.Body = body
+				}
+				subject := getString("subject", isFormatted)
+				if subject != "" {
+					mail.Subject = subject
+				}
 			}
 		} else {
 			mail.Body = getString("message", isMap)
+			mail.Subject = getString("subject", isMap)
 		}
 		mail.Uid = getString("uid", isMap)
 		mail.Id = getString("id", isMap)
 		mail.From = getString("from", isMap)
 		mail.To = getString("to", isMap)
 		mail.Cc = getString("cc", isMap)
-		mail.Subject = getString("subject", isMap)
 		mail.Folder = getString("folder", isMap)
 		mail.Timestamp = time.Unix(getInt("date", isMap), 0)
 

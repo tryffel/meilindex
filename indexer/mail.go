@@ -97,6 +97,24 @@ func (m *Mail) Sanitize() {
 	m.Cc = strings.Join(stripdAddressNames(m.Cc), ", ")
 }
 
+func (m *Mail) HighlightedBody() string {
+	body := m.Body
+	if strings.Contains(body, "<em>") {
+		body = strings.Replace(body, "<em>", "[black:orange:]", -1)
+		body = strings.Replace(body, "</em>", "[-:-:]", -1)
+	}
+	return body
+}
+
+func (m *Mail) HighlightedSubject() string {
+	subject := m.Subject
+	if strings.Contains(subject, "<em>") {
+		subject = strings.Replace(subject, "<em>", "[black:orange:]", -1)
+		subject = strings.Replace(subject, "</em>", "[-:-:]", -1)
+	}
+	return subject
+}
+
 var addressNames = regexp.MustCompile(`\"([^'\"]+)\"\s<([\w.]+@[a-zA-Z.]+)>`)
 var plainAddress = regexp.MustCompile(`([\w.]+@[a-zA-Z.]+)`)
 var escapedNames = regexp.MustCompile(`\"'([^\"]+)'\"\s<([\w.]+@[a-zA-Z.]+)>`)

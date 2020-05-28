@@ -21,10 +21,10 @@
 package widgets
 
 import (
+	"fmt"
 	"github.com/gdamore/tcell"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/tslocum/cview"
-	"strings"
 	"tryffel.net/go/meilindex/config"
 	"tryffel.net/go/meilindex/external"
 	"tryffel.net/go/meilindex/indexer"
@@ -93,25 +93,21 @@ func (w *Window) search(text string) {
 
 	w.list.Clear()
 	for i, v := range mails {
-		body := v.Body
-		if strings.Contains(body, "<em>") {
-			body = strings.Replace(body, "<em>", "[black:yellow:]", -1)
-			body = strings.Replace(body, "</em>", "[-:-:-]", -1)
-			v.Body = body
-		}
-
 		w.list.AddMessage(i+1, v)
 	}
 }
 
 func (w *Window) showMessage(mail *indexer.Mail) {
-	/*if index == 0 {
-		return
-	}
-	mail := w.mails[index-1]
+	text := fmt.Sprintf(`From: %s
+To: %s
+Date: %s
+Subject: %s
+------------
+	
+%s`,
+		mail.From, mail.To, mail.DateTime(), mail.HighlightedSubject(), mail.HighlightedBody())
 
-	*/
-	w.preview.SetText(mail.String())
+	w.preview.SetText(text)
 }
 
 func (w *Window) inputCapture(event *tcell.EventKey) *tcell.EventKey {
