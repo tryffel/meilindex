@@ -54,7 +54,7 @@ func NewMessageShort(index int, mail *indexer.Mail) *MessageShort {
 	m.SetBorder(false)
 	text := fmt.Sprintf(`%d. %s, %s
 %s
-`, index, mail.DateTime(), mail.From, mail.Subject)
+`, index, mail.ShortDateTime(), mail.From, mail.Subject)
 
 	m.SetText(text)
 	return m

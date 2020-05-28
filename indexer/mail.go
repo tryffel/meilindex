@@ -66,6 +66,24 @@ func (m *Mail) DateTime() string {
 	return m.Timestamp.Format("2006-01-02 15:04")
 }
 
+// ShortDateTime returns short / simple format for date, today, yesterday at xx.xx, date
+func (m *Mail) ShortDateTime() string {
+	today := time.Now()
+	distance := today.Sub(m.Timestamp)
+	minutes := distance.Minutes()
+	hours := minutes / 60
+
+	if today.Day() == m.Timestamp.Day() && hours < 24 {
+		return fmt.Sprintf("Today, %d:%d", m.Timestamp.Hour(), m.Timestamp.Minute())
+	}
+
+	if today.Day() == m.Timestamp.Day()+1 && hours < 48 {
+		return fmt.Sprintf("Yesterday, %d:%d", m.Timestamp.Hour(), m.Timestamp.Minute())
+	}
+
+	return m.Date()
+}
+
 // Sanitize makes various mail attributes nicer to read.
 func (m *Mail) Sanitize() {
 	body := cview.WordWrap(m.Body, 70)
