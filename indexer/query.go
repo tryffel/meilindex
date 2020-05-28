@@ -73,8 +73,7 @@ func (m *Meilisearch) Query(query, filter string) ([]*Mail, int, error) {
 
 	res, err := m.client.Search(m.Index).Search(meilisearch.SearchRequest{
 		Query:                 query,
-		Limit:                 40,
-		AttributesToCrop:      []string{"message:200"},
+		Limit:                 100,
 		AttributesToHighlight: []string{"message", "subject"},
 		Filters:               filter,
 	})

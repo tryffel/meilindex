@@ -75,6 +75,7 @@ func NewWindow() *Window {
 	w.preview.SetDynamicColors(true)
 	w.preview.SetBorder(true)
 	w.preview.SetTitle("Preview")
+	w.preview.SetWordWrap(true)
 	w.app.SetInputCapture(w.inputCapture)
 	return w
 }
@@ -108,6 +109,7 @@ Subject: %s
 		mail.From, mail.To, mail.DateTime(), mail.HighlightedSubject(), mail.HighlightedBody())
 
 	w.preview.SetText(text)
+	w.preview.ScrollTo(0, 0)
 }
 
 func (w *Window) inputCapture(event *tcell.EventKey) *tcell.EventKey {
