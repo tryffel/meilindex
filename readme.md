@@ -54,10 +54,11 @@ meilindex query --folder inbox --subject "item received" my message
 meilindex
 ```
 
-Movement inside gui:
+Gui shortcuts:
 * Move between tabs with TAB
 * Move up/down list: Key-Up/Key-Down or J/K
 * Enter mail with Enter
+* Open selected mail in thunderbird with F2 (requires 'thunderlink' add-on)
 * Close application with Ctrl-C
 
 

@@ -22,9 +22,11 @@ package widgets
 
 import (
 	"github.com/gdamore/tcell"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/tslocum/cview"
 	"strings"
 	"tryffel.net/go/meilindex/config"
+	"tryffel.net/go/meilindex/external"
 	"tryffel.net/go/meilindex/indexer"
 )
 
@@ -132,6 +134,18 @@ func (w *Window) inputCapture(event *tcell.EventKey) *tcell.EventKey {
 		w.app.SetFocus(nextFocus)
 		return nil
 	}
+
+	if key == tcell.KeyF2 {
+		index := w.list.GetSelectedIndex()
+		if index < len(w.list.shortMessages) {
+			mail := w.list.shortMessages[index].mail
+			err := external.OpenById(mail.Id)
+			if err != nil {
+				logrus.Errorf("Open mail in external application: %v", err)
+			}
+		}
+	}
+
 	return event
 }
 

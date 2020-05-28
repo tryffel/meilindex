@@ -109,7 +109,7 @@ func (m *Meilisearch) IndexMail(mail []*Mail) error {
 		documents[i] = doc
 
 		// email ids can be too complex for meilisearch. Use md5 as a unique id for mail.
-		hash := md5.Sum([]byte(v.Id))
+		hash := md5.Sum([]byte(v.Uid))
 		doc["uid"] = fmt.Sprintf("%x", hash)
 	}
 

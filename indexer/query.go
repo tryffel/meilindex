@@ -96,7 +96,8 @@ func (m *Meilisearch) Query(query, filter string) ([]*Mail, int, error) {
 		} else {
 			mail.Body = getString("message", isMap)
 		}
-		mail.Id = getString("uid", isMap)
+		mail.Uid = getString("uid", isMap)
+		mail.Id = getString("id", isMap)
 		mail.From = getString("from", isMap)
 		mail.To = getString("to", isMap)
 		mail.Cc = getString("cc", isMap)

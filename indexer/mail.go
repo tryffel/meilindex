@@ -29,6 +29,9 @@ import (
 )
 
 type Mail struct {
+	// Uid is hash calculated from id. Uid contains only ascii characters.
+	Uid string `json:"uid"`
+	// Original message id
 	Id          string    `json:"id"`
 	From        string    `json:"from"`
 	To          string    `json:"to"`
