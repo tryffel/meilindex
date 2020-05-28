@@ -27,6 +27,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"regexp"
 	"strings"
+	"time"
 	"tryffel.net/go/meilindex/config"
 )
 
@@ -90,18 +91,18 @@ func (m *Meilisearch) Query(query, filter string) ([]*Mail, int, error) {
 		mail := &Mail{}
 		if ok {
 			if isFormatted, ok := formatted.(map[string]interface{}); ok {
-				mail.Body = get("message", isFormatted)
+				mail.Body = getString("message", isFormatted)
 			}
 		} else {
-			mail.Body = get("message", isMap)
+			mail.Body = getString("message", isMap)
 		}
-		mail.Id = get("uid", isMap)
-		mail.From = get("from", isMap)
-		mail.To = get("to", isMap)
-		mail.Cc = get("cc", isMap)
-		mail.Subject = get("subject", isMap)
-		mail.Folder = get("folder", isMap)
-		mail.Date = get("date", isMap)
+		mail.Id = getString("uid", isMap)
+		mail.From = getString("from", isMap)
+		mail.To = getString("to", isMap)
+		mail.Cc = getString("cc", isMap)
+		mail.Subject = getString("subject", isMap)
+		mail.Folder = getString("folder", isMap)
+		mail.Timestamp = time.Unix(getInt("date", isMap), 0)
 
 		result[i] = mail
 
@@ -112,10 +113,31 @@ func (m *Meilisearch) Query(query, filter string) ([]*Mail, int, error) {
 	return result, int(res.ProcessingTimeMs), nil
 }
 
-func get(key string, container map[string]interface{}) string {
+func getString(key string, container map[string]interface{}) string {
 	val, ok := container[key].(string)
 	if !ok {
 		return ""
 	}
 	return val
+}
+
+func getInt(key string, container map[string]interface{}) int64 {
+	// int
+	intVal, ok := container[key].(int)
+	if ok {
+		return int64(intVal)
+	}
+	int64Val, ok := container[key].(int64)
+	if ok {
+		return int64Val
+	}
+	float32Val, ok := container[key].(float32)
+	if ok {
+		return int64(float32Val)
+	}
+	float64Val, ok := container[key].(float64)
+	if ok {
+		return int64(float64Val)
+	}
+	return 0
 }

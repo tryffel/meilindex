@@ -99,7 +99,7 @@ func (m *Meilisearch) IndexMail(mail []*Mail) error {
 		v.Sanitize()
 		doc := map[string]interface{}{}
 		doc["id"] = v.Id
-		doc["date"] = v.Date
+		doc["date"] = v.Timestamp.Unix()
 		doc["from"] = v.From
 		doc["to"] = v.To
 		doc["cc"] = v.Cc

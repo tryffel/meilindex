@@ -25,17 +25,18 @@ import (
 	"gitlab.com/tslocum/cview"
 	"regexp"
 	"strings"
+	"time"
 )
 
 type Mail struct {
-	Id          string `json:"id"`
-	From        string `json:"from"`
-	To          string `json:"to"`
-	Cc          string `json:"cc"`
-	Subject     string `json:"subject"`
-	Body        string `json:"body"`
-	Date        string `json:"date"`
-	Folder      string `json:"folder"`
+	Id          string    `json:"id"`
+	From        string    `json:"from"`
+	To          string    `json:"to"`
+	Cc          string    `json:"cc"`
+	Subject     string    `json:"subject"`
+	Body        string    `json:"body"`
+	Timestamp   time.Time `json:"date"`
+	Folder      string    `json:"folder"`
 	Attachments [][]byte
 }
 
@@ -52,7 +53,17 @@ subject: %s,
 
 %s
 
-`, m.Id, m.Folder, m.Date, m.From, m.To, m.Cc, m.Subject, m.Body)
+`, m.Id, m.Folder, m.DateTime(), m.From, m.To, m.Cc, m.Subject, m.Body)
+}
+
+// Date returns date part of timestamp
+func (m *Mail) Date() string {
+	return m.Timestamp.Format("2006-01-02")
+}
+
+// DateTime returns date and local time
+func (m *Mail) DateTime() string {
+	return m.Timestamp.Format("2006-01-02 15:04")
 }
 
 // Sanitize makes various mail attributes nicer to read.

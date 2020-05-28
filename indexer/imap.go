@@ -31,6 +31,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
+	"time"
 )
 
 type Imap struct {
@@ -150,19 +151,22 @@ func (i *Imap) FetchMail() ([]*Mail, error) {
 func mailToMail(m *mail.Reader) (*Mail, error) {
 	var err error
 	h := m.Header
+	date, err := h.Date()
+	if err != nil {
+		logrus.Errorf("getString date: %v", err)
+		date = time.Unix(0, 0)
+	} else {
+
+	}
 	out := &Mail{
-		From:    h.Get("From"),
-		To:      h.Get("To"),
-		Cc:      h.Get("Cc"),
-		Date:    h.Get("Date"),
-		Subject: h.Get("Subject"),
+		From:      h.Get("From"),
+		To:        h.Get("To"),
+		Cc:        h.Get("Cc"),
+		Timestamp: date,
+		Subject:   h.Get("Subject"),
 	}
 
 	out.Id, err = h.MessageID()
-	d, err := h.Date()
-	if err == nil {
-		out.Date = d.String()
-	}
 
 	s, err := h.Subject()
 	if err == nil {
