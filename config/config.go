@@ -35,7 +35,7 @@ type Config struct {
 type File struct {
 	Directory string
 	Recursive bool
-	Pattern   string
+	Mode      string
 }
 
 // Imap is imap-based email source

@@ -36,15 +36,17 @@ var indexCmd = &cobra.Command{
 
 Examples:
 * meilindex index imap 
-* meilindex index imap --folder INBOX
-* meilindex index imap --folder Archive/Inbox
+* meilindex index imap --folder Archive/All
+* meilindex index file --file ~/.thunderbird/my-profile/ImapMail/host/Inbox
+* meilindex index dir --dir ~/.thunderbird/my-proile/ImapMail/host
+	
 `,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return fmt.Errorf("expected at least 1 argument")
 		}
-		if args[0] != "imap" && args[0] != "file" {
-			return fmt.Errorf("expect location either 'imap' or 'file'")
+		if args[0] != "imap" && args[0] != "file" && args[0] != "dir" {
+			return fmt.Errorf("expect location either 'imap', 'file' or 'dir'")
 		}
 		return nil
 	},
@@ -53,10 +55,10 @@ Examples:
 func init() {
 	rootCmd.AddCommand(indexCmd)
 
-	indexCmd.Flags().String("folder", "INBOX", "Folder to index")
+	indexCmd.Flags().String("folder", "INBOX", "Imap folder to index")
 	indexCmd.Flags().String("file", "", "File to index")
+	indexCmd.Flags().String("dir", "", "Filesystem directory to recursively index")
 	indexCmd.Run = indexMail
-
 }
 
 func indexMail(cmd *cobra.Command, args []string) {
@@ -64,7 +66,14 @@ func indexMail(cmd *cobra.Command, args []string) {
 	var err error
 	if args[0] == "file" {
 		file, err := indexCmd.Flags().GetString("file")
-		mails, err = indexer.ReadFile(file)
+		mails, err = indexer.ReadFiles(file, false)
+		if err != nil {
+			fmt.Println(err)
+			//return
+		}
+	} else if args[0] == "dir" {
+		file, err := indexCmd.Flags().GetString("dir")
+		mails, err = indexer.ReadFiles(file, true)
 		if err != nil {
 			fmt.Println(err)
 			//return

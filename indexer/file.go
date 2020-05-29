@@ -21,15 +21,47 @@
 package indexer
 
 import (
-	"fmt"
 	"github.com/emersion/go-mbox"
 	"github.com/emersion/go-message/mail"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os"
+	"path/filepath"
+	"tryffel.net/go/meilindex/external"
 )
 
-func ReadFile(file string) ([]*Mail, error) {
+func ReadFiles(file string, recursive bool) ([]*Mail, error) {
+	var files []external.MboxFile
+	var err error
+	if recursive {
+		files, err = external.MboxFiles(file, recursive)
+		if err != nil {
+			return nil, err
+		}
+		logrus.Infof("Indexing %d folders", len(files))
+	} else {
+		folder, _ := filepath.Abs(file)
+		files = append(files, external.MboxFile{
+			File: file,
+			Name: folder,
+		})
+	}
+
+	mails := []*Mail{}
+	for _, v := range files {
+		logrus.Infof("Index %s", v.Name)
+		mail, err := readFile(v.File, v.Name)
+		if err != nil {
+			logrus.Error(err)
+		} else {
+			mails = append(mails, mail...)
+		}
+	}
+
+	return mails, nil
+}
+
+func readFile(file, folder string) ([]*Mail, error) {
 	fd, err := os.Open(file)
 	if err != nil {
 		return nil, err
@@ -59,10 +91,9 @@ func ReadFile(file string) ([]*Mail, error) {
 		} else {
 			var m *Mail
 			m, err = mailToMail(parsed)
-			//m.Folder = folder
+			m.Folder = folder
 
 			mails = append(mails, m)
-			fmt.Printf("Indexed %d mails\n", len(mails))
 		}
 
 	}

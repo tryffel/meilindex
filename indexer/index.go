@@ -25,6 +25,8 @@ import (
 	"fmt"
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/sirupsen/logrus"
+	"net/http"
+	"time"
 	"tryffel.net/go/meilindex/config"
 )
 
@@ -52,6 +54,13 @@ func (m *Meilisearch) Connect() error {
 	m.client = meilisearch.NewClient(meilisearch.Config{
 		Host:   m.Url,
 		APIKey: m.ApiKey,
+	})
+
+	m.client = meilisearch.NewClientWithCustomHTTPClient(meilisearch.Config{
+		Host:   m.Url,
+		APIKey: m.ApiKey,
+	}, http.Client{
+		Timeout: 10 * time.Second,
 	})
 
 	indexExists := false
