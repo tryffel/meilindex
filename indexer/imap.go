@@ -31,6 +31,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"io/ioutil"
+	"strings"
 	"time"
 )
 
@@ -185,22 +186,37 @@ func mailToMail(m *mail.Reader) (*Mail, error) {
 		switch part.Header.(type) {
 		case *mail.InlineHeader:
 			inlineHeaders += 1
-			// accept only 1st inline header
-			if inlineHeaders == 1 {
-				out.Body, err = html2text.FromReader(part.Body, html2text.Options{
-					PrettyTables: false,
-				})
-			} else {
-				b, err := ioutil.ReadAll(part.Body)
+			contentType := part.Header.Get("Content-Type")
+			if strings.Contains(contentType, "text/plain") {
+				body, err := ioutil.ReadAll(part.Body)
 				if err != nil {
-					logrus.Errorf("read message attachment: %v", err)
+					logrus.Errorf("Read plaing body: %v", err)
 				} else {
-					out.Attachments = append(out.Attachments, b)
+					out.Body = string(body)
 				}
-			}
+			} else {
+				// plain text already exists
+				if out.Body != "" {
+					continue
+				}
 
-			if err != nil {
-				logrus.Errorf("Read html body into text: %v", err)
+				// accept only 1st inline header
+				if inlineHeaders == 1 {
+					out.Body, err = html2text.FromReader(part.Body, html2text.Options{
+						PrettyTables: false,
+					})
+				} else {
+					b, err := ioutil.ReadAll(part.Body)
+					if err != nil {
+						logrus.Errorf("read message attachment: %v", err)
+					} else {
+						out.Attachments = append(out.Attachments, b)
+					}
+				}
+
+				if err != nil {
+					logrus.Errorf("Read html body into text: %v", err)
+				}
 			}
 		case *mail.AttachmentHeader:
 			b, err := ioutil.ReadAll(part.Body)
