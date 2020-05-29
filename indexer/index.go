@@ -26,6 +26,8 @@ import (
 	"github.com/meilisearch/meilisearch-go"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"runtime"
+	"sync"
 	"time"
 	"tryffel.net/go/meilindex/config"
 )
@@ -33,10 +35,12 @@ import (
 // NewMeilisearch creates new connection.
 func NewMeiliSearch() (*Meilisearch, error) {
 	m := &Meilisearch{
-		Url:    config.Conf.Meilisearch.Url,
-		Index:  config.Conf.Meilisearch.Index,
-		ApiKey: config.Conf.Meilisearch.ApiKey,
+		Url:           config.Conf.Meilisearch.Url,
+		Index:         config.Conf.Meilisearch.Index,
+		ApiKey:        config.Conf.Meilisearch.ApiKey,
+		maxNumPushers: runtime.NumCPU(),
 	}
+	m.pushDone = make(chan bool, m.maxNumPushers)
 	err := m.Connect()
 	return m, err
 }
@@ -47,6 +51,11 @@ type Meilisearch struct {
 	Index  string
 	ApiKey string
 	client *meilisearch.Client
+
+	lock          sync.Mutex
+	numPushers    int
+	maxNumPushers int
+	pushDone      chan bool
 }
 
 // Connect creates a connection to meilisearch instance and initializes index if neccessary.
@@ -97,8 +106,69 @@ func (m *Meilisearch) Connect() error {
 	return nil
 }
 
+// IndexMailBackground runs multiple goroutines (num of cpus) to push mails to meilisearch.
+// If all goroutines are busy, this call blocks as long as some goroutine is available.
+func (m *Meilisearch) IndexMailBackground(mail []*Mail) error {
+	started := time.Now()
+	for {
+		ready := time.Now()
+		if m.pusherAvailable() {
+			logrus.Debugf("Meilisearch pusher available after %d ms", ready.Sub(started).Milliseconds())
+			m.startNewPusher(mail)
+			break
+		} else {
+			time.Sleep(time.Millisecond * 5)
+		}
+		if ready.Sub(started).Seconds() > 3600 {
+			return fmt.Errorf("timeout waiting for available pusher")
+		}
+	}
+	return nil
+}
+
+func (m *Meilisearch) pusherAvailable() bool {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	return m.numPushers < m.maxNumPushers
+}
+
+func (m *Meilisearch) startNewPusher(mails []*Mail) {
+	m.lock.Lock()
+	m.numPushers += 1
+	m.lock.Unlock()
+
+	go func() {
+		err := m.indexMail(mails, true)
+		if err != nil {
+			logrus.Errorf("index mails: %v", err)
+		}
+		m.lock.Lock()
+		m.numPushers -= 1
+		m.lock.Unlock()
+	}()
+}
+
+func (m *Meilisearch) IndexComplete() bool {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	return m.numPushers == 0
+}
+
+func (m *Meilisearch) WaitIndexComplete() {
+	for {
+		if m.IndexComplete() {
+			return
+		}
+		time.Sleep(time.Millisecond * 10)
+	}
+}
+
+func (m *Meilisearch) IndexMail(mails []*Mail) error {
+	return m.indexMail(mails, false)
+}
+
 // IndexMail indexes new mail or updates existing mails.
-func (m *Meilisearch) IndexMail(mail []*Mail) error {
+func (m *Meilisearch) indexMail(mail []*Mail, background bool) error {
 
 	logrus.Infof("Index %d mails", len(mail))
 

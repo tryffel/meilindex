@@ -22,6 +22,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"tryffel.net/go/meilindex/config"
 	"tryffel.net/go/meilindex/indexer"
 
@@ -64,32 +65,28 @@ func init() {
 func indexMail(cmd *cobra.Command, args []string) {
 	var mails []*indexer.Mail
 	var err error
-	meili := indexer.Meilisearch{
-		Url:    config.Conf.Meilisearch.Url,
-		Index:  config.Conf.Meilisearch.Index,
-		ApiKey: config.Conf.Meilisearch.ApiKey,
-	}
-
-	err = meili.Connect()
+	meili, err := indexer.NewMeiliSearch()
 	if err != nil {
-		fmt.Printf("Error connecting to meilisearch: %v\n", err)
+		logrus.Errorf("Connect to meilisearch: %v", err)
 		return
 	}
 
 	if args[0] == "file" {
 		file, err := indexCmd.Flags().GetString("file")
-		mails, err = indexer.ReadFiles(file, false, meili.IndexMail)
+		mails, err = indexer.ReadFiles(file, false, meili.IndexMailBackground)
 		if err != nil {
 			fmt.Println(err)
 			//return
 		}
+		meili.WaitIndexComplete()
 	} else if args[0] == "dir" {
 		file, err := indexCmd.Flags().GetString("dir")
-		mails, err = indexer.ReadFiles(file, true, meili.IndexMail)
+		mails, err = indexer.ReadFiles(file, true, meili.IndexMailBackground)
 		if err != nil {
 			fmt.Println(err)
 			//return
 		}
+		meili.WaitIndexComplete()
 	} else {
 		mails, err = retrieveImap()
 		if err != nil {
