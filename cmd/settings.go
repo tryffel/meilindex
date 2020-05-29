@@ -38,6 +38,7 @@ func init() {
 	rootCmd.AddCommand(settingsCmd)
 	settingsCmd.AddCommand(stopWordsCmd)
 	settingsCmd.AddCommand(rankingCmd)
+	settingsCmd.AddCommand(synonymsCmd)
 	settingsCmd.PersistentFlags().Bool("get", true, "Use to get value")
 	settingsCmd.PersistentFlags().Bool("set", false, "Use to set value")
 	settingsCmd.Run = func(cmd *cobra.Command, args []string) {
@@ -46,6 +47,7 @@ func init() {
 
 	stopWordsCmd.Run = stopWords
 	rankingCmd.Run = rankings
+	synonymsCmd.Run = synonyms
 }
 
 // stopWordsCmd represents the settings command
@@ -58,6 +60,12 @@ var stopWordsCmd = &cobra.Command{
 var rankingCmd = &cobra.Command{
 	Use:   "ranking get/set [file]",
 	Short: "Configure ranking",
+}
+
+// settingsCmd represents the settings command
+var synonymsCmd = &cobra.Command{
+	Use:   "synonyms get/set [file]",
+	Short: "Configure synonyms",
 }
 
 func stopWords(cmd *cobra.Command, args []string) {
@@ -156,5 +164,29 @@ func rankings(cmd *cobra.Command, args []string) {
 		if err != nil {
 			fmt.Printf("Error applying ranking rules: %v\n", err)
 		}
+	}
+}
+
+func synonyms(cmd *cobra.Command, args []string) {
+	mode := "get"
+	if len(args) > 1 {
+		if args[0] == "set" {
+			mode = "set"
+		}
+	}
+
+	m, err := indexer.NewMeiliSearch()
+	if err != nil {
+		fmt.Printf("Error connecting to meilisearch: %v\n", err)
+		return
+	}
+
+	if mode == "get" {
+		synonyms, err := m.Synonyms()
+		if err != nil {
+			fmt.Printf("Error getting synonyms: %v\n", err)
+			return
+		}
+		fmt.Println(*synonyms)
 	}
 }

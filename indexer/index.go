@@ -228,3 +228,11 @@ func (m *Meilisearch) SetStopWords(words []string) error {
 	_, err := m.client.Settings(m.Index).UpdateStopWords(words)
 	return err
 }
+
+func (m *Meilisearch) Synonyms() (*map[string][]string, error) {
+	synonyms, err := m.client.Settings(m.Index).GetSynonyms()
+	if err != nil {
+		return nil, err
+	}
+	return synonyms, nil
+}
