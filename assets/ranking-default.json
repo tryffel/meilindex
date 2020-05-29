@@ -1,10 +1,11 @@
 {
   "rankings": [
-    "words",
     "typo",
+    "words",
     "proximity",
     "attribute",
     "wordsPosition",
-    "exactness"
+    "exactness",
+    "desc(date)"
   ]
 }
