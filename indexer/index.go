@@ -194,7 +194,7 @@ func (m *Meilisearch) indexMail(mail []*Mail, background bool) error {
 
 	res, err := m.client.Documents(m.Index).AddOrReplace(documents)
 
-	logrus.Info("Meilisearch update id: ", res.UpdateID)
+	logrus.Debug("Meilisearch update id: ", res.UpdateID)
 
 	if err != nil {
 		return fmt.Errorf("push documents: %v", err)
