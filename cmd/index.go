@@ -64,28 +64,6 @@ func init() {
 func indexMail(cmd *cobra.Command, args []string) {
 	var mails []*indexer.Mail
 	var err error
-	if args[0] == "file" {
-		file, err := indexCmd.Flags().GetString("file")
-		mails, err = indexer.ReadFiles(file, false)
-		if err != nil {
-			fmt.Println(err)
-			//return
-		}
-	} else if args[0] == "dir" {
-		file, err := indexCmd.Flags().GetString("dir")
-		mails, err = indexer.ReadFiles(file, true)
-		if err != nil {
-			fmt.Println(err)
-			//return
-		}
-	} else {
-		mails, err = retrieveImap()
-		if err != nil {
-			fmt.Printf("Error indexing from imap: %v\n", err)
-			return
-		}
-	}
-
 	meili := indexer.Meilisearch{
 		Url:    config.Conf.Meilisearch.Url,
 		Index:  config.Conf.Meilisearch.Index,
@@ -98,10 +76,31 @@ func indexMail(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	err = meili.IndexMail(mails)
-	if err != nil {
-		fmt.Printf("Error pushing mails to meilisearch: %v\n", err)
-		return
+	if args[0] == "file" {
+		file, err := indexCmd.Flags().GetString("file")
+		mails, err = indexer.ReadFiles(file, false, meili.IndexMail)
+		if err != nil {
+			fmt.Println(err)
+			//return
+		}
+	} else if args[0] == "dir" {
+		file, err := indexCmd.Flags().GetString("dir")
+		mails, err = indexer.ReadFiles(file, true, meili.IndexMail)
+		if err != nil {
+			fmt.Println(err)
+			//return
+		}
+	} else {
+		mails, err = retrieveImap()
+		if err != nil {
+			fmt.Printf("Error indexing from imap: %v\n", err)
+			return
+		}
+		err = meili.IndexMail(mails)
+		if err != nil {
+			fmt.Printf("Error pushing mails to meilisearch: %v\n", err)
+			return
+		}
 	}
 }
 

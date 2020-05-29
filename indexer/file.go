@@ -30,7 +30,8 @@ import (
 	"tryffel.net/go/meilindex/external"
 )
 
-func ReadFiles(file string, recursive bool) ([]*Mail, error) {
+// ReadFiles reads files and flushes batched mails to flushFunc
+func ReadFiles(file string, recursive bool, flushFunc func(mails []*Mail) error) ([]*Mail, error) {
 	var files []external.MboxFile
 	var err error
 	if recursive {
@@ -50,7 +51,7 @@ func ReadFiles(file string, recursive bool) ([]*Mail, error) {
 	mails := []*Mail{}
 	for _, v := range files {
 		logrus.Infof("Index %s", v.Name)
-		mail, err := readFile(v.File, v.Name)
+		mail, err := readFile(v.File, v.Name, flushFunc)
 		if err != nil {
 			logrus.Error(err)
 		} else {
@@ -61,7 +62,12 @@ func ReadFiles(file string, recursive bool) ([]*Mail, error) {
 	return mails, nil
 }
 
-func readFile(file, folder string) ([]*Mail, error) {
+func readFile(file, folder string, flushFunc func(mails []*Mail) error) ([]*Mail, error) {
+	batchSize := 1000
+	batch := 0
+	currentBatchSize := 0
+	totalMails := 0
+
 	fd, err := os.Open(file)
 	if err != nil {
 		return nil, err
@@ -94,8 +100,28 @@ func readFile(file, folder string) ([]*Mail, error) {
 			m.Folder = folder
 
 			mails = append(mails, m)
+			currentBatchSize += 1
+			if currentBatchSize == batchSize {
+				batch += 1
+				totalMails += currentBatchSize
+				err := flushFunc(mails)
+				if err != nil {
+					logrus.Errorf("Flush email batch: %v", err)
+				}
+				mails = []*Mail{}
+				currentBatchSize = 0
+			}
 		}
-
 	}
+	if len(mails) > 0 {
+		batch += 1
+		totalMails += len(mails)
+		err := flushFunc(mails)
+		if err != nil {
+			logrus.Errorf("Flush remaining email batch (size: %d): %v", len(mails), err)
+		}
+	}
+
+	logrus.Infof("Flushed %d batches, %d mails", batch, totalMails)
 	return mails, nil
 }
