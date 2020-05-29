@@ -32,9 +32,6 @@ import (
 var settingsCmd = &cobra.Command{
 	Use:   "settings",
 	Short: "Configure indexing & ranking",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("settings called")
-	},
 }
 
 func init() {
@@ -43,6 +40,9 @@ func init() {
 	settingsCmd.AddCommand(rankingCmd)
 	settingsCmd.PersistentFlags().Bool("get", true, "Use to get value")
 	settingsCmd.PersistentFlags().Bool("set", false, "Use to set value")
+	settingsCmd.Run = func(cmd *cobra.Command, args []string) {
+		settingsCmd.Help()
+	}
 
 	stopWordsCmd.Run = stopWords
 	rankingCmd.Run = rankings
