@@ -48,17 +48,33 @@ func ReadFiles(file string, recursive bool, flushFunc func(mails []*Mail) error)
 		})
 	}
 
+	batchSize := 1000
+
 	mails := []*Mail{}
+
+	// read file and send email batches if batch is full. If smaller, return array of mails.
+	// Try to always push reasonable batch size, even if single file contains less mails. Not batching
+	// small files increases indexing time significantly.
 	for _, v := range files {
 		logrus.Infof("Index %s", v.Name)
 		mail, err := readFile(v.File, v.Name, flushFunc)
 		if err != nil {
 			logrus.Error(err)
-		} else {
-			mails = append(mails, mail...)
+			continue
+		}
+		mails = append(mails, mail...)
+		if len(mails) >= batchSize {
+			err = flushFunc(mails)
+			if err != nil {
+				logrus.Error(err)
+			}
+			mails = []*Mail{}
 		}
 	}
 
+	if len(mails) > 0 {
+		err = flushFunc(mails)
+	}
 	return mails, nil
 }
 
@@ -113,15 +129,10 @@ func readFile(file, folder string, flushFunc func(mails []*Mail) error) ([]*Mail
 			}
 		}
 	}
-	if len(mails) > 0 {
-		batch += 1
-		totalMails += len(mails)
-		err := flushFunc(mails)
-		if err != nil {
-			logrus.Errorf("Flush remaining email batch (size: %d): %v", len(mails), err)
-		}
+
+	if batch > 0 {
+		logrus.Infof("Flushed %d batches, %d mails", batch, totalMails)
 	}
 
-	logrus.Infof("Flushed %d batches, %d mails", batch, totalMails)
 	return mails, nil
 }
