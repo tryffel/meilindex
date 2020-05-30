@@ -102,12 +102,13 @@ func (w *Window) showMessage(mail *indexer.Mail) {
 	text := fmt.Sprintf(`Folder: %s
 From: %s
 To: %s
+Cc: %s
 Date: %s
 Subject: %s
 ------------
 	
 %s`,
-		mail.Folder, mail.From, mail.To, mail.DateTime(), mail.HighlightedSubject(), mail.HighlightedBody())
+		mail.Folder, mail.From, mail.To, mail.Cc, mail.DateTime(), mail.HighlightedSubject(), mail.HighlightedBody())
 
 	w.preview.SetText(text)
 	w.preview.ScrollTo(0, 0)
