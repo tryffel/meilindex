@@ -1,0 +1,8 @@
+{
+  "synonyms": {
+    "food": ["bread", "soup", "steak"],
+    "bread": ["food"],
+    "soup": ["food"]
+  }
+}
+

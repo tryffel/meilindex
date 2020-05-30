@@ -236,3 +236,8 @@ func (m *Meilisearch) Synonyms() (*map[string][]string, error) {
 	}
 	return synonyms, nil
 }
+
+func (m *Meilisearch) SetSynonyms(synonyms *map[string][]string) error {
+	_, err := m.client.Settings(m.Index).UpdateSynonyms(*synonyms)
+	return err
+}

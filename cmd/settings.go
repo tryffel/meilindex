@@ -23,6 +23,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
 	"tryffel.net/go/meilindex/indexer"
@@ -188,5 +189,35 @@ func synonyms(cmd *cobra.Command, args []string) {
 			return
 		}
 		fmt.Println(*synonyms)
+		return
+	} else {
+		file := args[1]
+		fd, err := os.Open(file)
+		if err != nil {
+			fmt.Printf("Error opening file: %v\n", err)
+			return
+		}
+		defer fd.Close()
+
+		type Dto struct {
+			OneWay map[string][]string `json:"synonyms"`
+		}
+
+		dto := Dto{}
+
+		err = json.NewDecoder(fd).Decode(&dto)
+		if err != nil {
+			fmt.Printf("Error decoding json: %v\n", err)
+			return
+		}
+
+		if len(dto.OneWay) == 0 {
+			logrus.Info("Clearing synonyms")
+		}
+
+		err = m.SetSynonyms(&dto.OneWay)
+		if err != nil {
+			logrus.Errorf("Update synonyms: %v", err)
+		}
 	}
 }
