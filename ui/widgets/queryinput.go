@@ -27,23 +27,38 @@ import (
 
 type QueryInput struct {
 	*cview.Form
-	query *cview.InputField
+	query     *cview.InputField
+	filter    *cview.InputField
+	queryFunc func(string, string)
 }
 
-func NewQueryInput(query func(string)) *QueryInput {
+func NewQueryInput(query func(query, filter string)) *QueryInput {
 	q := &QueryInput{
-		Form:  cview.NewForm(),
-		query: cview.NewInputField(),
+		Form:      cview.NewForm(),
+		query:     cview.NewInputField(),
+		filter:    cview.NewInputField(),
+		queryFunc: query,
 	}
 
 	q.SetBorder(false)
 	q.query.SetLabel("Query")
-	q.query.SetPlaceholder("marketing OR sales")
+	q.query.SetPlaceholder("marketing")
+
+	q.filter.SetLabel("Filter")
+	q.filter.SetPlaceholder("folder=inbox AND from=sender@mail.com")
 
 	q.SetFieldTextColor(tcell.Color252)
 	q.SetFieldBackgroundColor(tcell.Color235)
 
 	q.AddFormItem(q.query)
-	q.query.SetChangedFunc(query)
+	q.AddFormItem(q.filter)
+	q.query.SetChangedFunc(q.search)
 	return q
+}
+
+func (q *QueryInput) search(query string) {
+	if q.queryFunc != nil {
+		filter := q.filter.GetText()
+		q.queryFunc(query, filter)
+	}
 }

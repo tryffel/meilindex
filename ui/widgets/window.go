@@ -59,7 +59,7 @@ func NewWindow() *Window {
 	err := w.client.Connect()
 	if err != nil {
 	}
-	w.SetRows(3, -1)
+	w.SetRows(5, -1)
 	w.SetColumns(-2, -1)
 
 	w.SetBorder(true)
@@ -84,8 +84,8 @@ func (w *Window) Run() {
 	w.app.Run()
 }
 
-func (w *Window) search(text string) {
-	mails, _, err := w.client.Query(text, "")
+func (w *Window) search(text, filter string) {
+	mails, _, err := w.client.Query(text, filter)
 	if err != nil {
 		return
 	}
@@ -138,6 +138,8 @@ func (w *Window) inputCapture(event *tcell.EventKey) *tcell.EventKey {
 		case w.list:
 			nextFocus = w.preview
 		case w.query, w.query.query:
+			nextFocus = w.query.filter
+		case w.query.filter:
 			nextFocus = w.list
 		case w.preview:
 			nextFocus = w.query
