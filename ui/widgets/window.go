@@ -32,13 +32,14 @@ import (
 
 type Window struct {
 	*twidgets.ModalLayout
-	query   *QueryInput
-	app     *cview.Application
-	list    *MessageList
-	preview *cview.TextView
-	navBar  *twidgets.NavBar
-	help    *Help
-	client  *indexer.Meilisearch
+	query    *QueryInput
+	app      *cview.Application
+	list     *MessageList
+	preview  *cview.TextView
+	navBar   *twidgets.NavBar
+	help     *Help
+	settings *Settings
+	client   *indexer.Meilisearch
 
 	mails []*indexer.Mail
 }
@@ -48,6 +49,7 @@ func NewWindow() *Window {
 		app:         cview.NewApplication(),
 		ModalLayout: twidgets.NewModalLayout(),
 		help:        NewHelp(),
+		settings:    NewSettings(),
 		client: &indexer.Meilisearch{
 			Url:    config.Conf.Meilisearch.Url,
 			Index:  config.Conf.Meilisearch.Index,
@@ -68,6 +70,7 @@ func NewWindow() *Window {
 	w.navBar = twidgets.NewNavBar(&colors, w.handleNavbar)
 	w.navBar.AddButton(cview.NewButton("Help"), tcell.KeyF1)
 	w.navBar.AddButton(cview.NewButton("Open mail"), tcell.KeyF2)
+	w.navBar.AddButton(cview.NewButton("Settings"), tcell.KeyF3)
 
 	w.query = NewQueryInput(w.search)
 	w.list = NewMessageList(w.showMessage)
@@ -170,6 +173,16 @@ func (w *Window) inputCapture(event *tcell.EventKey) *tcell.EventKey {
 		return nil
 	}
 
+	if key == tcell.KeyF3 {
+		if w.settings.isOpen || w.help.isOpen {
+			return event
+		} else {
+			w.settings.isOpen = true
+			w.AddDynamicModal(w.settings, twidgets.ModalSizeMedium)
+			w.app.SetFocus(w.settings)
+		}
+	}
+
 	if key == tcell.KeyF2 {
 		index := w.list.GetSelectedIndex()
 		if index < len(w.list.shortMessages) {
@@ -182,7 +195,7 @@ func (w *Window) inputCapture(event *tcell.EventKey) *tcell.EventKey {
 	}
 
 	if key == tcell.KeyF1 {
-		if w.help.isOpen {
+		if w.help.isOpen || w.settings.isOpen {
 			return event
 		} else {
 			w.help.isOpen = true
@@ -195,6 +208,10 @@ func (w *Window) inputCapture(event *tcell.EventKey) *tcell.EventKey {
 		if w.help.isOpen {
 			w.help.isOpen = false
 			w.RemoveModal(w.help)
+			w.app.SetFocus(w.query)
+		} else if w.settings.isOpen {
+			w.settings.isOpen = false
+			w.RemoveModal(w.settings)
 			w.app.SetFocus(w.query)
 		}
 	}
