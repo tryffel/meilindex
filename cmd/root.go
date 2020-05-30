@@ -22,9 +22,11 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
 	"strings"
+	"time"
 	"tryffel.net/go/meilindex/config"
 	"tryffel.net/go/meilindex/ui/widgets"
 
@@ -131,7 +133,10 @@ func initConfig() {
 		},
 	}
 
-	viper.ConfigFileUsed()
+	logrus.SetFormatter(&logrus.TextFormatter{
+		TimestampFormat: time.StampMilli,
+		FullTimestamp:   true,
+	})
 }
 
 func updateConfigFile() {
