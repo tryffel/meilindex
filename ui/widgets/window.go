@@ -21,6 +21,7 @@
 package widgets
 
 import (
+	"fmt"
 	"github.com/gdamore/tcell"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/tslocum/cview"
