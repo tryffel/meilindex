@@ -22,7 +22,6 @@ package indexer
 
 import (
 	"fmt"
-	"gitlab.com/tslocum/cview"
 	"regexp"
 	"strings"
 	"time"
@@ -89,8 +88,6 @@ func (m *Mail) ShortDateTime() string {
 
 // Sanitize makes various mail attributes nicer to read.
 func (m *Mail) Sanitize() {
-	body := cview.WordWrap(m.Body, 70)
-	m.Body = strings.Join(body, "\n")
 
 	m.From = strings.Join(stripdAddressNames(m.From), ", ")
 	m.To = strings.Join(stripdAddressNames(m.To), ", ")

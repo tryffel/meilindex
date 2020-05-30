@@ -168,6 +168,7 @@ func mailToMail(m *mail.Reader) (*Mail, error) {
 	}
 
 	out.Uid, err = h.MessageID()
+	out.Id, err = h.MessageID()
 
 	s, err := h.Subject()
 	if err == nil {

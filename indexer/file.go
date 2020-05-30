@@ -136,6 +136,11 @@ func readFile(file, folder string, flushFunc func(mails []*Mail) error) ([]*Mail
 		}
 	}
 
+	err = fd.Close()
+	if err != nil {
+		logrus.Errorf("close file: %v", err)
+	}
+
 	if batch > 0 {
 		logrus.Infof("Flushed %d batches, %d mails", batch, totalMails)
 	}
