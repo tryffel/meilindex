@@ -23,6 +23,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"tryffel.net/go/meilindex/config"
 	"tryffel.net/go/meilindex/indexer"
 
@@ -31,16 +32,19 @@ import (
 
 // indexCmd represents the index command
 var indexCmd = &cobra.Command{
-	Use:   "index [location]",
+	Use:   "index imap|file|dir",
 	Short: "Index mails",
-	Long: `Index mails from imap
+	Long: `Index mails from imap or file(s).
+	
+default imap / file / dir configuration is gathered from config file.
+'dir' indexes config.file.directory 
 
 Examples:
 * meilindex index imap 
 * meilindex index imap --folder Archive/All
 * meilindex index file --file ~/.thunderbird/my-profile/ImapMail/host/Inbox
-* meilindex index dir --dir ~/.thunderbird/my-proile/ImapMail/host
-	
+* meilindex index dir
+* meilindex index dir --dir ~/.thunderbird/my-profile/ImapMail/host
 `,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
@@ -80,8 +84,15 @@ func indexMail(cmd *cobra.Command, args []string) {
 		}
 		meili.WaitIndexComplete()
 	} else if args[0] == "dir" {
+		recursive := true
 		file, err := indexCmd.Flags().GetString("dir")
-		mails, err = indexer.ReadFiles(file, true, meili.IndexMailBackground)
+
+		if file == "" {
+			file = viper.GetString("file.directory")
+			recursive = viper.GetBool("file.recursive")
+		}
+
+		mails, err = indexer.ReadFiles(file, recursive, meili.IndexMailBackground)
 		if err != nil {
 			fmt.Println(err)
 			//return

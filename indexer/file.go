@@ -43,7 +43,7 @@ func ReadFiles(file string, recursive bool, flushFunc func(mails []*Mail) error)
 			logrus.Warning("Did not find any suitable Mbox files")
 			return nil, nil
 		}
-		logrus.Infof("Indexing %d folders", len(files))
+		logrus.Infof("Found %d folders", len(files))
 	} else {
 		folder, _ := filepath.Abs(file)
 		files = append(files, external.MboxFile{
@@ -61,8 +61,8 @@ func ReadFiles(file string, recursive bool, flushFunc func(mails []*Mail) error)
 	// read file and send email batches if batch is full. If smaller, return array of mails.
 	// Try to always push reasonable batch size, even if single file contains less mails. Not batching
 	// small files increases indexing time significantly.
-	for _, v := range files {
-		logrus.Infof("Indexing %s", v.Name)
+	for i, v := range files {
+		logrus.Infof("Indexing (%d / %d): %s", i, len(files), v.Name)
 		mail, indexed, err := readFile(v.File, v.Name, flushFunc)
 		if err != nil {
 			logrus.Error(err)

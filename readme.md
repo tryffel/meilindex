@@ -35,6 +35,8 @@ meilindex
 This should create new config file, which is by default at ~/.meilindex.yaml
 You can always override config file with '--config'.
 Edit config file to suit your needs, insert at least imap and meilisearch settings.
+All configuration file variables can be overridden with environment variables. Format is:
+MEILINDEX_<block>_<key>, e.g. MEILINDEX_MEILISEARCH_URL for meilisearch.url.
 
 3: (Optional) Customize Meilisearch index before parsing emails, see below
 
