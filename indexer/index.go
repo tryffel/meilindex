@@ -243,3 +243,11 @@ func (m *Meilisearch) SetSynonyms(synonyms *map[string][]string) error {
 	_, err := m.client.Settings(m.Index).UpdateSynonyms(*synonyms)
 	return err
 }
+
+func (m *Meilisearch) Stats() *meilisearch.StatsIndex {
+	stats, err := m.client.Stats().Get(m.Index)
+	if err != nil {
+		logrus.Errorf("get stats: %v", err)
+	}
+	return stats
+}

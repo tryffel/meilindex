@@ -21,21 +21,23 @@
 package widgets
 
 import (
-	"fmt"
 	"github.com/gdamore/tcell"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/tslocum/cview"
 	"tryffel.net/go/meilindex/config"
 	"tryffel.net/go/meilindex/external"
 	"tryffel.net/go/meilindex/indexer"
+	"tryffel.net/go/twidgets"
 )
 
 type Window struct {
-	*cview.Grid
+	*twidgets.ModalLayout
 	query   *QueryInput
 	app     *cview.Application
 	list    *MessageList
 	preview *cview.TextView
+	navBar  *twidgets.NavBar
+	help    *Help
 	client  *indexer.Meilisearch
 
 	mails []*indexer.Mail
@@ -43,8 +45,9 @@ type Window struct {
 
 func NewWindow() *Window {
 	w := &Window{
-		Grid: cview.NewGrid(),
-		app:  cview.NewApplication(),
+		app:         cview.NewApplication(),
+		ModalLayout: twidgets.NewModalLayout(),
+		help:        NewHelp(),
 		client: &indexer.Meilisearch{
 			Url:    config.Conf.Meilisearch.Url,
 			Index:  config.Conf.Meilisearch.Index,
@@ -53,21 +56,37 @@ func NewWindow() *Window {
 		preview: cview.NewTextView(),
 	}
 
+	colors := twidgets.NavBarColors{
+		Background:            tcell.Color234,
+		ButtonBackground:      tcell.Color234,
+		ButtonBackgroundFocus: tcell.Color234,
+		Text:                  tcell.Color252,
+		TextFocus:             tcell.Color252,
+		Shortcut:              tcell.Color214,
+		ShortcutFocus:         tcell.Color214,
+	}
+	w.navBar = twidgets.NewNavBar(&colors, w.handleNavbar)
+	w.navBar.AddButton(cview.NewButton("Help"), tcell.KeyF1)
+	w.navBar.AddButton(cview.NewButton("Open mail"), tcell.KeyF2)
+
 	w.query = NewQueryInput(w.search)
 	w.list = NewMessageList(w.showMessage)
 
 	err := w.client.Connect()
 	if err != nil {
 	}
-	w.SetRows(5, -1)
-	w.SetColumns(-2, -1)
 
-	w.SetBorder(true)
-	w.SetTitle("Meilindex")
+	grid := w.ModalLayout.Grid()
 
-	w.AddItem(w.query, 0, 0, 1, 2, 1, 15, true)
-	w.AddItem(w.list, 1, 0, 1, 1, 5, 15, false)
-	w.AddItem(w.preview, 1, 1, 1, 1, 5, 15, false)
+	grid.SetRows(1, 5, -1, -1, -1, -1, -1, -1, 5, 1)
+	grid.SetColumns(1, -1, -1, -1, -1, -1, -1, -1, -1, 1)
+	grid.SetBorder(true)
+	grid.SetTitle("Meilindex")
+
+	grid.AddItem(w.navBar, 0, 0, 1, 10, 1, 15, false)
+	grid.AddItem(w.query, 1, 0, 1, 10, 5, 15, true)
+	grid.AddItem(w.list, 2, 0, 8, 6, 5, 15, false)
+	grid.AddItem(w.preview, 2, 6, 8, 4, 5, 15, false)
 
 	w.app.SetRoot(w, true).EnableMouse(true)
 	w.app.SetFocus(w)
@@ -162,7 +181,29 @@ func (w *Window) inputCapture(event *tcell.EventKey) *tcell.EventKey {
 		}
 	}
 
+	if key == tcell.KeyF1 {
+		if w.help.isOpen {
+			return event
+		} else {
+			w.help.isOpen = true
+			w.AddDynamicModal(w.help, twidgets.ModalSizeMedium)
+			w.app.SetFocus(w.help)
+		}
+	}
+
+	if key == tcell.KeyEscape {
+		if w.help.isOpen {
+			w.help.isOpen = false
+			w.RemoveModal(w.help)
+			w.app.SetFocus(w.query)
+		}
+	}
+
 	return event
+}
+
+func (w *Window) handleNavbar(label string) {
+
 }
 
 func init() {
