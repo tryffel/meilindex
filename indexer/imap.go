@@ -159,12 +159,18 @@ func mailToMail(m *mail.Reader) (*Mail, error) {
 	} else {
 
 	}
+	from := h.Get("From")
+	to := h.Get("To")
+	cc := h.Get("Cc")
 	out := &Mail{
-		From:      h.Get("From"),
-		To:        h.Get("To"),
-		Cc:        h.Get("Cc"),
+
+		To:        stripdAddressNames(to),
+		Cc:        stripdAddressNames(cc),
 		Timestamp: date,
 		Subject:   h.Get("Subject"),
+	}
+	if address := stripdAddressNames(from); len(address) >= 1 {
+		out.From = address[0]
 	}
 
 	out.Uid, err = h.MessageID()

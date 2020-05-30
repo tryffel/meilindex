@@ -33,8 +33,8 @@ type Mail struct {
 	// Original message id
 	Id              string    `json:"id"`
 	From            string    `json:"from"`
-	To              string    `json:"to"`
-	Cc              string    `json:"cc"`
+	To              []string  `json:"to"`
+	Cc              []string  `json:"cc"`
 	Subject         string    `json:"subject"`
 	Body            string    `json:"body"`
 	Timestamp       time.Time `json:"date"`
@@ -90,9 +90,6 @@ func (m *Mail) ShortDateTime() string {
 // Sanitize makes various mail attributes nicer to read.
 func (m *Mail) Sanitize() {
 
-	m.From = strings.Join(stripdAddressNames(m.From), ", ")
-	m.To = strings.Join(stripdAddressNames(m.To), ", ")
-	m.Cc = strings.Join(stripdAddressNames(m.Cc), ", ")
 }
 
 func (m *Mail) HighlightedBody() string {

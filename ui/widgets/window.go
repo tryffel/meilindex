@@ -99,17 +99,31 @@ func (w *Window) search(text string) {
 }
 
 func (w *Window) showMessage(mail *indexer.Mail) {
-	text := fmt.Sprintf(`Folder: %s
-From: %s
-To: %s
-Cc: %s
-Date: %s
+	text := "Folder: " + mail.Folder + "\n"
+	text += "From: " + mail.From + "\n"
+	text += "To: "
+	for i, v := range mail.To {
+		if i > 0 {
+			text += ", "
+		}
+		text += v
+	}
+	text += "\n"
+	text += "Cc: "
+	for i, v := range mail.Cc {
+		if i > 0 {
+			text += ", "
+		}
+		text += v
+	}
+	text += "\n"
+
+	text += fmt.Sprintf(`Date: %s
 Subject: %s
 ------------
 	
 %s`,
-		mail.Folder, mail.From, mail.To, mail.Cc, mail.DateTime(), mail.HighlightedSubject(), mail.HighlightedBody())
-
+		mail.DateTime(), mail.HighlightedSubject(), mail.HighlightedBody())
 	w.preview.SetText(text)
 	w.preview.ScrollTo(0, 0)
 }

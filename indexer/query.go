@@ -106,10 +106,11 @@ func (m *Meilisearch) Query(query, filter string) ([]*Mail, int, error) {
 		mail.Uid = getString("uid", isMap)
 		mail.Id = getString("id", isMap)
 		mail.From = getString("from", isMap)
-		mail.To = getString("to", isMap)
-		mail.Cc = getString("cc", isMap)
+		mail.To = getStringArray("to", isMap)
+		mail.Cc = getStringArray("cc", isMap)
 		mail.Folder = getString("folder", isMap)
 		mail.Timestamp = time.Unix(getInt("date", isMap), 0)
+		mail.AttachmentNames = getStringArray("attachments", isMap)
 
 		result[i] = mail
 
@@ -147,4 +148,18 @@ func getInt(key string, container map[string]interface{}) int64 {
 		return int64(float64Val)
 	}
 	return 0
+}
+
+func getStringArray(key string, container map[string]interface{}) []string {
+	out := []string{}
+	arr, ok := container[key].([]interface{})
+	if !ok {
+		return out
+	}
+	for _, v := range arr {
+		if isString, ok := v.(string); ok {
+			out = append(out, isString)
+		}
+	}
+	return out
 }
