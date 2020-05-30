@@ -3,7 +3,9 @@
 [![License](https://img.shields.io/github/license/tryffel/mailindex.svg)](LICENSE)
 [![Godoc Reference](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/tryffel.net/go/meilindex?tab=overview)
 
-Email indexing and extremely fast full-text-search with Meilisearch. 
+Email indexing and extremely fast full-text-search with Meilisearch. Meilindex supports configuring 
+stop-words, ranking and synonyms. These are highly user-specific customizations and should be configured 
+for more relevant search results. 
 
 Features:
 * Index mail from Imap or Mbox-file (tested with Thunderbird), store to Meilisearch
@@ -57,6 +59,14 @@ meilindex query --folder inbox --subject "item received" my message
 meilindex
 ```
 
+Query can be anything, filter is of format 'field=value' or 'field="value"'. Logical operators are supported. See
+Meilisearch docs for more info. Filters must match exactly the field (no full-text-search, case-insensitive). 
+Example filters:
+```
+folder=inbox AND from="example sender"
+folder=inbox AND NOT from="example.sender@example.company"
+```
+
 Gui shortcuts:
 * Move between tabs with TAB
 * Move up/down list: Key-Up/Key-Down or J/K
@@ -97,3 +107,15 @@ meilindex settings ranking get
 meilindex settings ranking set assets/ranking-default.json
 ```
 
+## Synonyms
+Currently Meilindex supports pushing one-way synonyms, and it is up to user to create multiple-way mappings. Synonyms 
+are also highly personal / context / language specific, so user should try to use this as their advantage.
+Example synonyms mapping is found in assets/synonyms-example.json.
+
+```
+# view synonyms
+meilindex settings synonyms (get)
+
+# set synonyms
+meilindex settings synonyms set assets/synonyms-default.json
+```
