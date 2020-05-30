@@ -31,15 +31,16 @@ type Mail struct {
 	// Uid is hash calculated from id. Uid contains only ascii characters.
 	Uid string `json:"uid"`
 	// Original message id
-	Id          string    `json:"id"`
-	From        string    `json:"from"`
-	To          string    `json:"to"`
-	Cc          string    `json:"cc"`
-	Subject     string    `json:"subject"`
-	Body        string    `json:"body"`
-	Timestamp   time.Time `json:"date"`
-	Folder      string    `json:"folder"`
-	Attachments [][]byte
+	Id              string    `json:"id"`
+	From            string    `json:"from"`
+	To              string    `json:"to"`
+	Cc              string    `json:"cc"`
+	Subject         string    `json:"subject"`
+	Body            string    `json:"body"`
+	Timestamp       time.Time `json:"date"`
+	Folder          string    `json:"folder"`
+	Attachments     [][]byte
+	AttachmentNames []string
 }
 
 func (m *Mail) String() string {

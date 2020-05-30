@@ -220,6 +220,8 @@ func mailToMail(m *mail.Reader) (*Mail, error) {
 				}
 			}
 		case *mail.AttachmentHeader:
+			contentType := part.Header.Get("Content-Type")
+			out.AttachmentNames = append(out.AttachmentNames, ParseAttachments(contentType))
 			b, err := ioutil.ReadAll(part.Body)
 			if err != nil {
 				logrus.Errorf("read message attachment: %v", err)

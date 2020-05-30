@@ -27,6 +27,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 	"tryffel.net/go/meilindex/config"
@@ -185,6 +186,7 @@ func (m *Meilisearch) indexMail(mail []*Mail, background bool) error {
 		doc["subject"] = v.Subject
 		doc["message"] = v.Body
 		doc["folder"] = v.Folder
+		doc["attachments"] = strings.Join(v.AttachmentNames, ",")
 		documents[i] = doc
 
 		// email ids can be too complex for meilisearch. Use md5 as a unique id for mail.
