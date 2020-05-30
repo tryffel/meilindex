@@ -42,9 +42,9 @@ default imap / file / dir configuration is gathered from config file.
 Examples:
 * meilindex index imap 
 * meilindex index imap --folder Archive/All
-* meilindex index file --file ~/.thunderbird/my-profile/ImapMail/host/Inbox
+* meilindex index file ~/.thunderbird/my-profile/ImapMail/host/Inbox
 * meilindex index dir
-* meilindex index dir --dir ~/.thunderbird/my-profile/ImapMail/host
+* meilindex index dir ~/.thunderbird/my-profile/ImapMail/host
 `,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
@@ -61,8 +61,6 @@ func init() {
 	rootCmd.AddCommand(indexCmd)
 
 	indexCmd.Flags().String("folder", "INBOX", "Imap folder to index")
-	indexCmd.Flags().String("file", "", "File to index")
-	indexCmd.Flags().String("dir", "", "Filesystem directory to recursively index")
 	indexCmd.Run = indexMail
 }
 
@@ -76,23 +74,35 @@ func indexMail(cmd *cobra.Command, args []string) {
 	}
 
 	if args[0] == "file" {
-		file, err := indexCmd.Flags().GetString("file")
+		var file string
+		var err error
+		if len(args) >= 2 {
+			file = args[1]
+		} else {
+			file, err = indexCmd.Flags().GetString("file")
+		}
 		mails, err = indexer.ReadFiles(file, false, meili.IndexMailBackground)
 		if err != nil {
-			fmt.Println(err)
-			//return
+			logrus.Error(err)
 		}
 		meili.WaitIndexComplete()
 	} else if args[0] == "dir" {
 		recursive := true
-		file, err := indexCmd.Flags().GetString("dir")
 
-		if file == "" {
-			file = viper.GetString("file.directory")
+		var dir string
+		var err error
+		if len(args) >= 2 {
+			dir = args[1]
+		} else {
+			dir, err = indexCmd.Flags().GetString("dir")
+		}
+
+		if dir == "" {
+			dir = viper.GetString("file.directory")
 			recursive = viper.GetBool("file.recursive")
 		}
 
-		mails, err = indexer.ReadFiles(file, recursive, meili.IndexMailBackground)
+		mails, err = indexer.ReadFiles(dir, recursive, meili.IndexMailBackground)
 		if err != nil {
 			fmt.Println(err)
 			//return
