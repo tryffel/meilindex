@@ -39,6 +39,10 @@ func ReadFiles(file string, recursive bool, flushFunc func(mails []*Mail) error)
 		if err != nil {
 			return nil, err
 		}
+		if len(files) == 0 {
+			logrus.Warning("Did not find any suitable Mbox files")
+			return nil, nil
+		}
 		logrus.Infof("Indexing %d folders", len(files))
 	} else {
 		folder, _ := filepath.Abs(file)
