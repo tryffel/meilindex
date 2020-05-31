@@ -108,7 +108,8 @@ func (w *Window) Run() {
 }
 
 func (w *Window) search(text, filter string) {
-	mails, _, err := w.client.Query(text, filter)
+	filt := indexer.NewFilter(filter).Query()
+	mails, _, err := w.client.Query(text, filt)
 	if err != nil {
 		return
 	}

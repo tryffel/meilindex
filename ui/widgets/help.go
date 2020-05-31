@@ -166,14 +166,30 @@ func (h *Help) shortcutsPage() string {
 
 func (h *Help) searchPage() string {
 	return `[yellow]Query[-]:
-Query field supports full-text-search. Any field will be included, but only subject and message body will be
-	highlighted. Query field must always include something for search results to appear, even with filters.
+Query field supports full-text-search. Any field will be 
+included, but only subject and message body will be highlighted. 
+Query field must always include something for search results to appear, even with filters.
 	
 [yellow]Filter[-]:
 You can define additional filters, which must match exactly. Boolean operators are supported. 
+Supported fields are: [from, to, subject, cc, body, before/after/time]. 
+	
 Examples: 
 	* 'folder=inbox AND from="example sender"'
 	* 'folder=inbox AND NOT from="example.sender@example.company'
+	
+	
+[yellow]Time range filters[-]:
+Time ranges are parsed separately. 
+Supported fields are: 'after', 'before' and 'time', see below for examples.
+Format is year, optional month and optional day, 
+e.g.: '2020', '2020-01' or '2020-01-01'. 2020 and 2020-01
+will be expanded to 2020-01-01.
+
+Examples:
+	* 'after=2020-06 AND before=2021' (matches mails June 2020 - Jan 2021)
+	* 'time="2020:2021"'
+	
 `
 }
 
