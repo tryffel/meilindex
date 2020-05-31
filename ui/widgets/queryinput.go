@@ -45,7 +45,7 @@ func NewQueryInput(query func(query, filter string)) *QueryInput {
 	q.query.SetPlaceholder("marketing")
 
 	q.filter.SetLabel("Filter")
-	q.filter.SetPlaceholder("folder=inbox AND from=sender@mail.com")
+	q.filter.SetPlaceholder(`folder=inbox AND time="2020:2020-06"`)
 
 	q.SetFieldTextColor(tcell.Color252)
 	q.SetFieldBackgroundColor(tcell.Color235)
@@ -53,12 +53,20 @@ func NewQueryInput(query func(query, filter string)) *QueryInput {
 	q.AddFormItem(q.query)
 	q.AddFormItem(q.filter)
 	q.query.SetChangedFunc(q.search)
+	q.filter.SetChangedFunc(q.searchFilter)
 	return q
 }
 
 func (q *QueryInput) search(query string) {
 	if q.queryFunc != nil {
 		filter := q.filter.GetText()
+		q.queryFunc(query, filter)
+	}
+}
+
+func (q *QueryInput) searchFilter(filter string) {
+	if q.queryFunc != nil {
+		query := q.query.GetText()
 		q.queryFunc(query, filter)
 	}
 }
