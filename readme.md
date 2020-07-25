@@ -7,6 +7,8 @@ Email indexing and extremely fast full-text-search with Meilisearch. Meilindex s
 stop-words, ranking and synonyms. These are highly user-specific customizations and should be configured 
 for more relevant search results. 
 
+Licensed under AGPL-3.
+
 ![Screenshot](Screenshot.png)
 
 ## Features:
@@ -15,8 +17,6 @@ for more relevant search results.
 * Configure Meilisearch: stop words, ranking rules order
 * Query Meilisearch instance either with CLI or with terminal gui
 * Open selected mail in Thunderbird
-
-This is a work-in-progress.
 
 Default config file: ~/meilindex.yaml
 
@@ -68,6 +68,7 @@ meilindex query --folder inbox --subject "item received" my message
 ```
 
 6: Terminal ui for viewing & queying mail
+Meilindex ships with simple Cli Gui for searching & viewing emails. Open it with:
 ```
 meilindex
 ```
