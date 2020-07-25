@@ -7,7 +7,9 @@ Email indexing and extremely fast full-text-search with Meilisearch. Meilindex s
 stop-words, ranking and synonyms. These are highly user-specific customizations and should be configured 
 for more relevant search results. 
 
-Features:
+![Screenshot](Screenshot.png)
+
+## Features:
 * Index mail from Imap or Mbox-file (tested with Thunderbird), store to Meilisearch
 * Multiple configurations for different mailboxes
 * Configure Meilisearch: stop words, ranking rules order
@@ -40,7 +42,16 @@ MEILINDEX_<block>_<key>, e.g. MEILINDEX_MEILISEARCH_URL for meilisearch.url.
 
 3: (Optional) Customize Meilisearch index before parsing emails, see below
 
-4: Index mail from imap
+4: Index mail
+
+A) Index mail from local Mbox file(s)
+```
+meilindex index dir /home/me/.thunderbird/my-profile/ImapMail/my-mail.com
+# OR 
+meilindex index file /home/me/.thunderbird/my-profile/ImapMail/my-mail.com/INBOX
+```
+
+B) Index mail from imap
 ```
 # index INBOX
 meilindex index imap 
@@ -67,6 +78,15 @@ Example filters:
 ```
 folder=inbox AND from="example sender"
 folder=inbox AND NOT from="example.sender@example.company"
+
+# show everything in Jan 2020
+time=2020-01-01:2020-01-31
+
+# show everything in Feb or after
+after=2020-02
+
+# show everything before Feb
+before=2020-02
 ```
 
 Gui shortcuts:
