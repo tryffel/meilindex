@@ -74,7 +74,7 @@ func (m *Meilisearch) Query(query, filter string) ([]*Mail, int, error) {
 	res, err := m.client.Search(m.Index).Search(meilisearch.SearchRequest{
 		Query:                 query,
 		Limit:                 100,
-		AttributesToHighlight: []string{"message", "subject"},
+		AttributesToHighlight: []string{"message", "subject", "from"},
 		Filters:               filter,
 	})
 
@@ -98,20 +98,23 @@ func (m *Meilisearch) Query(query, filter string) ([]*Mail, int, error) {
 				if subject != "" {
 					mail.Subject = subject
 				}
+				from := getString("from", isFormatted)
+				if from != "" {
+					mail.From = from
+				}
 			}
 		} else {
 			mail.Body = getString("message", isMap)
 			mail.Subject = getString("subject", isMap)
+			mail.From = getString("from", isMap)
 		}
 		mail.Uid = getString("uid", isMap)
 		mail.Id = getString("id", isMap)
-		mail.From = getString("from", isMap)
 		mail.To = getStringArray("to", isMap)
 		mail.Cc = getStringArray("cc", isMap)
 		mail.Folder = getString("folder", isMap)
 		mail.Timestamp = time.Unix(getInt("date", isMap), 0)
 		mail.AttachmentNames = getStringArray("attachments", isMap)
-
 		result[i] = mail
 
 	}

@@ -110,6 +110,15 @@ func (m *Mail) HighlightedSubject() string {
 	return subject
 }
 
+func (m *Mail) HighlightedFrom() string {
+	from := m.From
+	if strings.Contains(from, "<em>") {
+		from = strings.Replace(from, "<em>", "[black:orange:]", -1)
+		from = strings.Replace(from, "</em>", "[-:-:]", -1)
+	}
+	return from
+}
+
 var addressNames = regexp.MustCompile(`\"([^'\"]+)\"\s<([\w.]+@[a-zA-Z.]+)>`)
 var plainAddress = regexp.MustCompile(`([\w.]+@[a-zA-Z.]+)`)
 var escapedNames = regexp.MustCompile(`\"'([^\"]+)'\"\s<([\w.]+@[a-zA-Z.]+)>`)

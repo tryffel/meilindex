@@ -55,7 +55,7 @@ func NewMessageShort(index int, mail *indexer.Mail) *MessageShort {
 	m.SetDynamicColors(true)
 	text := fmt.Sprintf(`%d. %s, %s
 %s
-`, index, mail.ShortDateTime(), mail.From, mail.HighlightedSubject())
+`, index, mail.ShortDateTime(), mail.HighlightedFrom(), mail.HighlightedSubject())
 
 	m.SetText(text)
 	return m

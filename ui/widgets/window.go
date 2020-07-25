@@ -124,7 +124,7 @@ func (w *Window) search(text, filter string) {
 
 func (w *Window) showMessage(mail *indexer.Mail) {
 	text := "Folder: " + mail.Folder + "\n"
-	text += "From: " + mail.From + "\n"
+	text += "From: " + mail.HighlightedFrom() + "\n"
 	text += "To: "
 	for i, v := range mail.To {
 		if i > 0 {
@@ -142,12 +142,23 @@ func (w *Window) showMessage(mail *indexer.Mail) {
 	}
 	text += "\n"
 
+	attachmentNames := ""
+	if len(mail.AttachmentNames) > 0 {
+		attachmentNames = fmt.Sprintf("}\nAttachments (%d): ", len(mail.AttachmentNames))
+		for i, attachment := range mail.AttachmentNames {
+			if i > 0 {
+				attachmentNames += ", "
+			}
+			attachmentNames += attachment
+		}
+	}
+
 	text += fmt.Sprintf(`Date: %s
-Subject: %s
+Subject: %s%s
 ------------
 	
 %s`,
-		mail.DateTime(), mail.HighlightedSubject(), mail.HighlightedBody())
+		mail.DateTime(), mail.HighlightedSubject(), attachmentNames, mail.HighlightedBody())
 	w.preview.SetText(text)
 	w.preview.ScrollTo(0, 0)
 }
