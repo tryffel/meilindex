@@ -24,7 +24,7 @@ go get tryffel.net/go/meilindex
 ```
 
 # Run
-1: Make sure meilisearch is running and accessible
+1: Make sure meilisearch is running and accessible, tested with version 0.12.
 try with e.g. ```curl http://localhost:7700```
 
 2: Create & fill config file

@@ -33,6 +33,10 @@ import (
 	"tryffel.net/go/meilindex/config"
 )
 
+const (
+	minServerVersion = "0.12"
+)
+
 // NewMeilisearch creates new connection.
 func NewMeiliSearch() (*Meilisearch, error) {
 	m := &Meilisearch{
@@ -73,8 +77,17 @@ func (m *Meilisearch) Connect() error {
 		Timeout: 10 * time.Second,
 	})
 
+	version, err := m.ServerVersion()
+	if err != nil {
+		return fmt.Errorf("get server version: %v", err)
+	}
+
+	if !strings.HasPrefix(version, minServerVersion) {
+		logrus.Warningf("Server version mismatch: %s, supported version: %s", version, minServerVersion)
+	}
+
 	indexExists := false
-	_, err := m.client.Indexes().Get(m.Index)
+	_, err = m.client.Indexes().Get(m.Index)
 	if err != nil {
 		if e, ok := err.(*meilisearch.Error); ok {
 			if e.StatusCode == 404 {
@@ -105,6 +118,19 @@ func (m *Meilisearch) Connect() error {
 	}
 
 	return nil
+}
+
+func (m *Meilisearch) ServerVersion() (string, error) {
+	v, err := m.client.Version().Get()
+	if err != nil {
+		return "", err
+	}
+
+	if v != nil {
+		return v.PkgVersion, err
+	}
+
+	return "", fmt.Errorf("empty version, %v", err)
 }
 
 // IndexMailBackground runs multiple goroutines (num of cpus) to push mails to meilisearch.
@@ -244,10 +270,31 @@ func (m *Meilisearch) SetSynonyms(synonyms *map[string][]string) error {
 	return err
 }
 
-func (m *Meilisearch) Stats() *meilisearch.StatsIndex {
+func (m *Meilisearch) Stats() ServerStats {
 	stats, err := m.client.Stats().Get(m.Index)
 	if err != nil {
 		logrus.Errorf("get stats: %v", err)
 	}
-	return stats
+
+	serverStats := ServerStats{
+		NumDocuments:     stats.NumberOfDocuments,
+		Indexing:         stats.IsIndexing,
+		MinServerVersion: minServerVersion,
+	}
+
+	version, err := m.ServerVersion()
+	if err == nil {
+		serverStats.ServerVersion = version
+	} else {
+		serverStats.ServerVersion = "-"
+	}
+
+	return serverStats
+}
+
+type ServerStats struct {
+	NumDocuments     int64
+	Indexing         bool
+	ServerVersion    string
+	MinServerVersion string
 }
