@@ -222,11 +222,18 @@ func (m *Meilisearch) indexMail(mail []*Mail, background bool) error {
 
 	res, err := m.client.Documents(m.Index).AddOrReplace(documents)
 
-	logrus.Debug("Meilisearch update id: ", res.UpdateID)
-
 	if err != nil {
-		return fmt.Errorf("push documents: %v", err)
+		if meiliError, ok := err.(*meilisearch.Error); ok {
+			msg := meiliError.MeilisearchMessage
+			code := meiliError.StatusCode
+			expectedCode := meiliError.StatusCodeExpected
+			err = fmt.Errorf("push %d emails: expected status: %d, got status: %d: %s",
+				len(documents), expectedCode, code, msg)
+		} else {
+			return fmt.Errorf("push documents: %v", err)
+		}
 	} else {
+		logrus.Debug("Meilisearch update id: ", res.UpdateID)
 		logrus.Infof("Created / updated %d mails", len(mail))
 	}
 	return nil
