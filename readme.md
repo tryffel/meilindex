@@ -26,7 +26,7 @@ go get tryffel.net/go/meilindex
 ```
 
 # Run
-1: Make sure meilisearch is running and accessible, tested with version 0.12.
+1: Make sure Meilisearch is running and accessible (tested with version 0.12).
 try with e.g. ```curl http://localhost:7700```
 
 2: Create & fill config file
@@ -59,6 +59,17 @@ meilindex index imap
 # index any other folder, e.g. Archive
 meilindex index imap --folder Archive
 ```
+
+If you get following error during indexing:
+```
+index mails: push xxx emails: expected status: [202], got status: 413: Payload to large
+```
+then you need to increase max http body size for Meilisearch with flag: '--http-payload-size-limit'.
+
+Due to parsing library used with Mbox files, parsing email sometimes fails, resulting in warning
+starting with '(skip)', e.g. '(skip) read message attachment'. Just ignore these for now. Some parts of the email
+may be inaccurate due to these errors: date, attachments, plain text body.
+
 
 5: Query with cli
 ```
@@ -96,6 +107,12 @@ Gui shortcuts:
 * Enter mail with Enter
 * Open selected mail in thunderbird with F2 (requires 'thunderlink' add-on)
 * Close application with Ctrl-C
+
+## Config
+
+See ~/.meilindex.yaml.
+
+For periodic background indexing, just run indexing command with e.g. cron.
 
 
 # Customize Meilisearch index
