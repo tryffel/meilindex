@@ -154,7 +154,7 @@ func mailToMail(m *mail.Reader) (*Mail, error) {
 	h := m.Header
 	date, err := h.Date()
 	if err != nil {
-		logrus.Errorf("getString date: %v", err)
+		logrus.Warningf("(skip) parse date: %v", err)
 		date = time.Unix(0, 0)
 	} else {
 
@@ -186,7 +186,7 @@ func mailToMail(m *mail.Reader) (*Mail, error) {
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			logrus.Errorf("parse mail part: %v", err)
+			logrus.Warningf("(skip mail): parse part: %v", err)
 			break
 		}
 
@@ -197,7 +197,7 @@ func mailToMail(m *mail.Reader) (*Mail, error) {
 			if strings.Contains(contentType, "text/plain") {
 				body, err := ioutil.ReadAll(part.Body)
 				if err != nil {
-					logrus.Errorf("Read plaing body: %v", err)
+					logrus.Warningf("(skip) read plain body: %v", err)
 				} else {
 					out.Body = string(body)
 				}
@@ -230,7 +230,7 @@ func mailToMail(m *mail.Reader) (*Mail, error) {
 			out.AttachmentNames = append(out.AttachmentNames, ParseAttachments(contentType))
 			b, err := ioutil.ReadAll(part.Body)
 			if err != nil {
-				logrus.Errorf("read message attachment: %v", err)
+				logrus.Warningf("(skip) read message attachment: %v", err)
 			} else {
 				out.Attachments = append(out.Attachments, b)
 			}

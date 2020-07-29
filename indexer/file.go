@@ -119,7 +119,7 @@ func readFile(file, folder string, flushFunc func(mails []*Mail) error) ([]*Mail
 
 		parsed, err := mail.CreateReader(msg)
 		if err != nil {
-			logrus.Errorf("parse mail: %v", err)
+			logrus.Warningf("(skip) parse mail: %v", err)
 		} else {
 			var m *Mail
 			m, err = mailToMail(parsed)
