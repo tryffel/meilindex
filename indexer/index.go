@@ -229,6 +229,7 @@ func (m *Meilisearch) indexMail(mail []*Mail, background bool) error {
 			expectedCode := meiliError.StatusCodeExpected
 			err = fmt.Errorf("push %d emails: expected status: %d, got status: %d: %s",
 				len(documents), expectedCode, code, msg)
+			return err
 		} else {
 			return fmt.Errorf("push documents: %v", err)
 		}
