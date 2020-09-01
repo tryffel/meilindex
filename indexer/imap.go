@@ -183,11 +183,17 @@ func mailToMail(m *mail.Reader) (*Mail, error) {
 	inlineHeaders := 0
 	for {
 		part, err := m.NextPart()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			logrus.Warningf("(skip mail): parse part: %v", err)
-			break
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			errString := err.Error()
+			if errString == "multipart: NextPart: EOF" {
+				break
+			} else {
+				logrus.Warningf("(skip mail): parse part: %v", err)
+				break
+			}
 		}
 
 		switch part.Header.(type) {
