@@ -228,7 +228,10 @@ func mailToMail(m *mail.Reader) (*Mail, error) {
 				}
 
 				if err != nil {
-					logrus.Errorf("Read html body into text: %v", err)
+					errString := err.Error()
+					if errString != "unexpected EOF" {
+						logrus.Errorf("Read html body into text: %v", err)
+					}
 				}
 			}
 		case *mail.AttachmentHeader:
