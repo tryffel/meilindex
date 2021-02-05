@@ -96,6 +96,7 @@ func initConfig() {
 	viper.SetDefault("file.directory", "/home/me/.mails")
 	viper.SetDefault("file.recursive", "false")
 	viper.SetDefault("file.mode", "thunderbird")
+	viper.SetDefault("file.batch_size", 1000)
 
 	viper.SetDefault("meilisearch.url", "http://localhost:7700")
 	viper.SetDefault("meilisearch.index", "mail")
@@ -119,6 +120,7 @@ func initConfig() {
 			Directory: viper.GetString("file.directory"),
 			Recursive: viper.GetBool("file.recursive"),
 			Mode:      viper.GetString("file.mode"),
+			BatchSize: viper.GetInt("file.batch_size"),
 		},
 		Imap: config.Imap{
 			Url:              viper.GetString("imap.url"),

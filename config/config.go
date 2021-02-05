@@ -37,6 +37,7 @@ type File struct {
 	Directory string
 	Recursive bool
 	Mode      string
+	BatchSize int
 }
 
 // Imap is imap-based email source

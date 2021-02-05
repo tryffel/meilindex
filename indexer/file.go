@@ -27,6 +27,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"tryffel.net/go/meilindex/config"
 	"tryffel.net/go/meilindex/external"
 )
 
@@ -52,7 +53,7 @@ func ReadFiles(file string, recursive bool, flushFunc func(mails []*Mail) error)
 		})
 	}
 
-	batchSize := 1000
+	batchSize := config.Conf.File.BatchSize
 
 	mails := []*Mail{}
 

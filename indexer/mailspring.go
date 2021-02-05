@@ -112,7 +112,7 @@ func ReadMailspring(file string, recursive bool, flushFunc func(mails []*Mail) e
 
 	defer db.Close()
 
-	batchSize := 1000
+	batchSize := config.Conf.File.BatchSize
 	rawMails := make([]mailSpringMail, 0, batchSize)
 
 	var totalMails int
