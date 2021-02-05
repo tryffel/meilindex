@@ -4,11 +4,19 @@
 
 # File source configuration
 file:
-  # directory for mailbox files
+  # directory for mailbox files.
   directory: /home/user/.thunderbird/<id>/ImapMail/mailbox
+  # mode to use: thunderbird (mailbox files) or Mailspring.
+  # For mailspring, provide full path to database file,
+  # which is usually /home/user/.config/Mailspring/edgehill.db.
   mode: thunderbird
   # whether to recurse or use single mailbox file
   recursive: "true"
+
+  # batch / page size.
+  # Larger batch usually makes indexing faster, but requires more memory. Default is 1000.
+  # On modern pc, this could easily be set to 2000 or 5000.
+  batch_size: 1000
 
 # Gui tweaks
 gui:

@@ -12,7 +12,7 @@ Licensed under AGPL-3.
 ![Screenshot](Screenshot.png)
 
 ## Features:
-* Index mail from Imap or Mbox-file (tested with Thunderbird), store to Meilisearch
+* Index mail from Imap, Mbox-file (tested with Thunderbird) or Mailspring, store to Meilisearch
 * Multiple configurations for different mailboxes
 * Configure Meilisearch: stop words, ranking rules order
 * Query Meilisearch instance either with CLI or with terminal gui
@@ -49,6 +49,8 @@ A) Index mail from local Mbox file(s)
 meilindex index dir /home/me/.thunderbird/my-profile/ImapMail/my-mail.com
 # OR 
 meilindex index file /home/me/.thunderbird/my-profile/ImapMail/my-mail.com/INBOX
+# OR
+./meilindex index mailspring /home/me/.config/Mailspring/edgehill.db
 ```
 
 B) Index mail from imap
