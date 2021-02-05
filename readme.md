@@ -26,7 +26,7 @@ go get tryffel.net/go/meilindex
 ```
 
 # Run
-1: Make sure Meilisearch is running and accessible (tested with version 0.12).
+1: Make sure Meilisearch is running and accessible (tested with versions 0.12 - 0.18).
 try with e.g. ```curl http://localhost:7700```
 
 2: Create & fill config file
@@ -119,6 +119,10 @@ For periodic background indexing, just run indexing command with e.g. cron.
 Meilisearch features various optimizations and customizations for tailoring search results, 
 see [docs](https://docs.meilisearch.com/references/settings.html) for more info. Meilindex supports 
 modifying some of them, which hopefully makes the search experience better.
+
+**Note** Meilisearch upgrade invalidates its database (at least before stable release). 
+It is up to user to upgrade database with Meilisearch Dump, or re-create it by deleting Meilisearch database
+before indexing mails with Meilindex.
 
 ## Stop words
 Stop words are irrelevant words in regard to searching content. 
