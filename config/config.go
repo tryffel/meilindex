@@ -29,6 +29,7 @@ type Config struct {
 	File        File
 	Imap        Imap
 	Meilisearch Meilisearch
+	Gui         Gui
 }
 
 // File is email locating on filesystem
@@ -53,4 +54,8 @@ type Meilisearch struct {
 	Url    string
 	Index  string
 	ApiKey string
+}
+
+type Gui struct {
+	Mouse bool
 }

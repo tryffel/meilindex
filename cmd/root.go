@@ -101,6 +101,8 @@ func initConfig() {
 	viper.SetDefault("meilisearch.index", "mail")
 	viper.SetDefault("meilisearch.api_key", "masterKey")
 
+	viper.SetDefault("gui.mouse", false)
+
 	viper.SetEnvPrefix("meilindex")
 	viper.AutomaticEnv() // read in environment variables that match
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
@@ -130,6 +132,9 @@ func initConfig() {
 			Url:    viper.GetString("meilisearch.url"),
 			Index:  viper.GetString("meilisearch.index"),
 			ApiKey: viper.GetString("meilisearch.api_key"),
+		},
+		Gui: config.Gui{
+			Mouse: viper.GetBool("gui.mouse"),
 		},
 	}
 

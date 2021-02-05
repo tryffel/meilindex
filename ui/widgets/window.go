@@ -92,7 +92,7 @@ func NewWindow() *Window {
 	grid.AddItem(w.list, 2, 0, 8, 6, 5, 15, false)
 	grid.AddItem(w.preview, 2, 6, 8, 4, 5, 15, false)
 
-	w.app.SetRoot(w, true).EnableMouse(true)
+	w.app.SetRoot(w, true).EnableMouse(config.Conf.Gui.Mouse)
 	w.app.SetFocus(w)
 
 	w.preview.SetDynamicColors(true)

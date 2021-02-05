@@ -1,0 +1,30 @@
+# Meilindex sample configuration file.
+# Meilindex supports multiple sources for reading mails.
+# By default, Meilindex reads this file from /home/user/.meilindex.yaml and creates one if needed.
+
+# File source configuration
+file:
+  # directory for mailbox files
+  directory: /home/user/.thunderbird/<id>/ImapMail/mailbox
+  mode: thunderbird
+  # whether to recurse or use single mailbox file
+  recursive: "true"
+
+# Gui tweaks
+gui:
+  mouse: false
+
+# Imap source
+imap:
+  folder: INBOX
+  password: memailing
+  skip_tls_verification: "false"
+  tls: "true"
+  url: imap.mymail.com:993
+  username: me@mymail.com
+
+# Meilisearch
+meilisearch:
+  api_key: masterKey
+  index: mail
+  url: http://localhost:7700
