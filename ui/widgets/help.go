@@ -70,8 +70,8 @@ func NewHelp() *Help {
 [yellow]Meilisearch[-]:
 Total mails: %d
 Indexing in progress: %t
-Server version: %s (%s supported)
-`, stats.NumDocuments, stats.Indexing, stats.ServerVersion, stats.MinServerVersion)
+Server version: %s
+`, stats.NumDocuments, stats.Indexing, stats.ServerVersion)
 	}
 
 	return h

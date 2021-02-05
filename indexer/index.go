@@ -33,10 +33,6 @@ import (
 	"tryffel.net/go/meilindex/config"
 )
 
-const (
-	minServerVersion = "0.12"
-)
-
 // NewMeilisearch creates new connection.
 func NewMeiliSearch() (*Meilisearch, error) {
 	m := &Meilisearch{
@@ -283,9 +279,8 @@ func (m *Meilisearch) Stats() ServerStats {
 	}
 
 	serverStats := ServerStats{
-		NumDocuments:     stats.NumberOfDocuments,
-		Indexing:         stats.IsIndexing,
-		MinServerVersion: minServerVersion,
+		NumDocuments: stats.NumberOfDocuments,
+		Indexing:     stats.IsIndexing,
 	}
 
 	version, err := m.ServerVersion()
@@ -299,8 +294,7 @@ func (m *Meilisearch) Stats() ServerStats {
 }
 
 type ServerStats struct {
-	NumDocuments     int64
-	Indexing         bool
-	ServerVersion    string
-	MinServerVersion string
+	NumDocuments  int64
+	Indexing      bool
+	ServerVersion string
 }
