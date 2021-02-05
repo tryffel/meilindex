@@ -82,9 +82,7 @@ func (m *Meilisearch) Connect() error {
 		return fmt.Errorf("get server version: %v", err)
 	}
 
-	if !strings.HasPrefix(version, minServerVersion) {
-		logrus.Warningf("Server version mismatch: %s, supported version: %s", version, minServerVersion)
-	}
+	logrus.Infof("Meilisearch version: %s", version)
 
 	indexExists := false
 	_, err = m.client.Indexes().Get(m.Index)
