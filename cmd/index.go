@@ -114,7 +114,7 @@ func indexMail(cmd *cobra.Command, args []string) {
 		if len(args) >= 2 {
 			file = args[1]
 		} else {
-			file, err = indexCmd.Flags().GetString("file")
+			file = config.Conf.File.Directory
 		}
 
 		_, err = indexer.ReadMailspring(file, false, meili.IndexMailBackground)
