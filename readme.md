@@ -44,13 +44,11 @@ MEILINDEX_<block>_<key>, e.g. MEILINDEX_MEILISEARCH_URL for meilisearch.url.
 
 4: Index mail
 
-A) Index mail from local Mbox file(s)
+A) Index mail from local Mbox file(s) (e.g. Thunderbird)
 ```
 meilindex index dir /home/me/.thunderbird/my-profile/ImapMail/my-mail.com
 # OR 
 meilindex index file /home/me/.thunderbird/my-profile/ImapMail/my-mail.com/INBOX
-# OR
-./meilindex index mailspring /home/me/.config/Mailspring/edgehill.db
 ```
 
 B) Index mail from imap
@@ -60,6 +58,19 @@ meilindex index imap
 
 # index any other folder, e.g. Archive
 meilindex index imap --folder Archive
+```
+
+C) Index mail from Mailspring-database
+
+**Note**: Mailspring does not sync all mails locally, so Meilindex is unable to index full bodies of all mails.
+Only mails that are present in local database are indexed with body, all other mails are indexed according to Mailspring
+policy, that is, sender/receiver,subject,folder,date.
+
+```
+./meilindex index mailspring <mailspring-database>
+
+# OR: set config.file.mode=mailspring and file.directory=<mailspring database file>
+./meilindex index mailspring
 ```
 
 If you get following error during indexing:
@@ -124,7 +135,8 @@ modifying some of them, which hopefully makes the search experience better.
 
 **Note** Meilisearch upgrade invalidates its database (at least before stable release). 
 It is up to user to upgrade database with Meilisearch Dump, or re-create it by deleting Meilisearch database
-before indexing mails with Meilindex.
+before indexing mails with Meilindex. After recreating Meilisearch index, remember to push settings 
+(synonyms,ranking,stopwords) to empty database.
 
 ## Stop words
 Stop words are irrelevant words in regard to searching content. 
