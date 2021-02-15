@@ -50,7 +50,7 @@ Examples:
 		if len(args) < 1 {
 			return fmt.Errorf("expected at least 1 argument")
 		}
-		if args[0] != "imap" && args[0] != "file" && args[0] != "dir" && args[0] != "mailspring" {
+		if args[0] != "imap" && args[0] != "file" && args[0] != "dir" && args[0] != "mailspring" && args[0] != "isync" {
 			return fmt.Errorf("expect location either 'imap', 'file', 'dir' or 'mailspring'")
 		}
 		return nil
@@ -120,6 +120,26 @@ func indexMail(cmd *cobra.Command, args []string) {
 		_, err = indexer.ReadMailspring(file, false, meili.IndexMailBackground)
 		if err != nil {
 			logrus.Error(err)
+		}
+		meili.WaitIndexComplete()
+	} else if args[0] == "isync" {
+
+		var dir string
+		var err error
+		if len(args) >= 2 {
+			dir = args[1]
+		} else {
+			dir, err = indexCmd.Flags().GetString("dir")
+		}
+
+		if dir == "" {
+			dir = viper.GetString("file.directory")
+		}
+
+		err = indexer.ReadVerbatimDir(dir, meili.IndexMailBackground)
+		if err != nil {
+			fmt.Println(err)
+			//return
 		}
 		meili.WaitIndexComplete()
 	} else {

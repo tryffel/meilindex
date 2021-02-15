@@ -3,6 +3,7 @@ package external
 import (
 	"github.com/sirupsen/logrus"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -63,6 +64,74 @@ func mboxFiles(baseDir string, parentName string) ([]MboxFile, error) {
 				}
 				files = append(files, file)
 			}
+		}
+	}
+	return files, nil
+}
+
+func VerbatimFiles(baseDir string) ([]MboxFile, error) {
+	return verbatimFiles(baseDir, "")
+}
+
+var verbatimFileSuffices = map[string]bool{
+	",S":  true,
+	",RS": true,
+	",FS": true,
+}
+
+func verbatimFiles(baseDir, parentName string) ([]MboxFile, error) {
+	var files []MboxFile
+
+	dirs, err := filepath.Glob(baseDir + "/*")
+	if err != nil {
+		return nil, err
+	}
+	fileNames, err := filepath.Glob(baseDir)
+	if err != nil {
+		return nil, err
+
+	}
+
+	println(fileNames)
+	for _, v := range dirs {
+
+		_, relativeName := path.Split(v)
+		if relativeName == "cur" {
+			found, err := filepath.Glob(v + "/*")
+			if err != nil {
+				logrus.Errorf("list files: %v", err)
+			} else {
+				for _, file := range found {
+					base := filepath.Base(v)
+					file := MboxFile{
+						File: file,
+					}
+					if parentName == "" {
+						file.Name = base
+					} else {
+						file.Name = parentName
+					}
+					files = append(files, file)
+				}
+			}
+
+		} else if relativeName == "tmp" || relativeName == "new" || relativeName == ".mbsyncstate" ||
+			relativeName == ".uidvalidity" {
+			// pass
+		} else {
+			// recurse
+			base := filepath.Base(v)
+			parent := base
+			if parentName != "" {
+				parent = parentName + "/" + base
+			}
+			found, err := verbatimFiles(v, parent)
+			if err != nil {
+				logrus.Error(err)
+			} else {
+				files = append(files, found...)
+			}
+
 		}
 	}
 	return files, nil
